@@ -1,0 +1,3056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Games Suite Pro</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3a 50%, #0a0a2a 100%);
+            min-height: 100vh;
+            font-family: 'Orbitron', monospace;
+            color: #00ffaa;
+            overflow: hidden;
+            outline: none;
+        }
+        
+        .game-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        /* Loading Screen */
+        .loading-screen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .loading-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 1.5rem;
+            color: #00ffaa;
+            margin-bottom: 2rem;
+            text-shadow: 0 0 20px #00ffaa;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        @keyframes glow {
+            from { text-shadow: 0 0 10px #00ffaa, 0 0 20px #00ffaa; }
+            to { text-shadow: 0 0 20px #00ffaa, 0 0 40px #00ffaa, 0 0 60px #00ffaa; }
+        }
+        
+        .loading-bar-container {
+            width: 400px;
+            height: 30px;
+            background: #111;
+            border: 2px solid #00ffaa;
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.3);
+        }
+        
+        .loading-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00ffaa, #00ff66, #00ffaa);
+            transition: width 0.1s;
+            box-shadow: 0 0 10px #00ffaa;
+        }
+        
+        .loading-text {
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: #888;
+        }
+        
+        .loading-percent {
+            margin-top: 0.5rem;
+            font-size: 1.2rem;
+            color: #00ffaa;
+        }
+        
+        /* Start Screen */
+        .start-screen {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .game-logo {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            animation: glow 1.5s ease-in-out infinite alternate;
+        }
+        
+        .game-subtitle {
+            font-size: 1rem;
+            color: #ffaa00;
+            margin-bottom: 3rem;
+        }
+        
+        .start-button {
+            padding: 20px 60px;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            background: transparent;
+            border: 3px solid #00ffaa;
+            color: #00ffaa;
+            cursor: pointer;
+            transition: all 0.3s;
+            animation: pulse 2s infinite;
+        }
+        
+        .start-button:hover {
+            background: #00ffaa;
+            color: #000;
+            box-shadow: 0 0 30px #00ffaa;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 10px #00ffaa; }
+            50% { box-shadow: 0 0 30px #00ffaa, 0 0 50px #00ffaa; }
+        }
+        
+        /* Menu Box */
+        .menu-box {
+            display: none;
+            background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #00ffaa;
+            border-radius: 10px;
+            padding: 30px 50px;
+            min-width: 400px;
+            box-shadow: 0 0 30px rgba(0, 255, 170, 0.3);
+        }
+        
+        .menu-title {
+            text-align: center;
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            color: #ffaa00;
+            border-bottom: 2px solid #00ffaa;
+            padding-bottom: 1rem;
+        }
+        
+        .menu-item {
+            padding: 15px 20px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .menu-item:hover, .menu-item.selected {
+            background: rgba(0, 255, 170, 0.2);
+            border-color: #00ffaa;
+            transform: translateX(10px);
+        }
+        
+        .menu-item.selected {
+            background: rgba(0, 255, 170, 0.3);
+            box-shadow: 0 0 15px rgba(0, 255, 170, 0.5);
+        }
+        
+        .menu-item .arrow {
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        
+        .menu-item.selected .arrow {
+            opacity: 1;
+        }
+        
+        .menu-hint {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        
+        /* Game Screen */
+        .game-screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+            padding: 20px;
+        }
+        
+        .game-panels {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            height: calc(100% - 150px);
+            margin-top: 10px;
+        }
+        
+        .game-panel {
+            flex: 1;
+            max-width: 500px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 3px solid #00ffaa;
+            border-radius: 10px;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .game-panel.inactive {
+            opacity: 0.3;
+            border-color: #333;
+        }
+        
+        .game-panel.inactive::after {
+            content: 'INACTIVE';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            color: #333;
+        }
+        
+        .panel-title {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #ffaa00;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        
+        /* TTT Board */
+        .ttt-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            max-width: 300px;
+            margin: 20px auto;
+        }
+        
+        .ttt-cell {
+            aspect-ratio: 1;
+            background: rgba(0, 50, 50, 0.5);
+            border: 2px solid #00ffaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+        
+        .ttt-cell:hover:not(.taken) {
+            background: rgba(0, 255, 170, 0.2);
+        }
+        
+        .ttt-cell.selected {
+            box-shadow: 0 0 20px #00ffaa, inset 0 0 20px rgba(0, 255, 170, 0.3);
+        }
+        
+        .ttt-cell.x { color: #ff4444; }
+        .ttt-cell.o { color: #44ff44; }
+        .ttt-cell.winner { animation: winGlow 0.5s infinite alternate; }
+        
+        @keyframes winGlow {
+            from { box-shadow: 0 0 10px #ffaa00; }
+            to { box-shadow: 0 0 30px #ffaa00, 0 0 50px #ffaa00; }
+        }
+        
+        .ttt-cell .cell-number {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #333;
+        }
+        
+        /* Word Guess Panel */
+        .word-display {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        
+        .letter-box {
+            width: 40px;
+            height: 50px;
+            border: 2px solid #00ffaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            background: rgba(0, 50, 50, 0.5);
+        }
+        
+        .letter-box.revealed {
+            color: #ffaa00;
+            background: rgba(255, 170, 0, 0.1);
+        }
+        
+        .word-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 5px;
+        }
+        
+        .wrong-letters { color: #ff4444; }
+        .correct-letters { color: #44ff44; }
+        
+        /* Timer Bar */
+        .timer-bar-container {
+            width: 100%;
+            height: 20px;
+            background: #111;
+            border: 1px solid #00ffaa;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .timer-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff4444, #ffaa00, #44ff44);
+            transition: width 1s linear;
+        }
+        
+        /* Bottom Status */
+        .game-status {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #00ffaa;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .status-left, .status-right {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* Victory Screen */
+        .victory-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .victory-title {
+            font-family: 'Press Start 2P', monospace;
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            animation: rainbow 2s linear infinite;
+        }
+        
+        @keyframes rainbow {
+            0% { color: #ff0000; }
+            16% { color: #ff8800; }
+            33% { color: #ffff00; }
+            50% { color: #00ff00; }
+            66% { color: #0088ff; }
+            83% { color: #8800ff; }
+            100% { color: #ff0000; }
+        }
+        
+        .victory-details {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .victory-score {
+            font-size: 2rem;
+            color: #ffaa00;
+            margin-bottom: 2rem;
+        }
+        
+        /* AI Thinking */
+        .ai-thinking {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            animation: blink 1s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Category Badge */
+        .category-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255, 170, 0, 0.2);
+            border: 1px solid #ffaa00;
+            border-radius: 20px;
+            color: #ffaa00;
+            font-size: 0.8rem;
+            margin-right: 10px;
+        }
+        
+        .difficulty-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .difficulty-badge.easy { background: rgba(0, 255, 0, 0.2); border: 1px solid #00ff00; color: #00ff00; }
+        .difficulty-badge.medium { background: rgba(255, 170, 0, 0.2); border: 1px solid #ffaa00; color: #ffaa00; }
+        .difficulty-badge.hard { background: rgba(255, 0, 0, 0.2); border: 1px solid #ff0000; color: #ff0000; }
+        
+        /* Input Modal */
+        .input-modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 200;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .input-box {
+            background: #111;
+            border: 3px solid #00ffaa;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .input-box input {
+            background: #000;
+            border: 2px solid #00ffaa;
+            color: #00ffaa;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-family: 'Orbitron', monospace;
+            outline: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .input-box input:focus {
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.5);
+        }
+        
+        /* Leaderboard */
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+        
+        .leaderboard-table th {
+            color: #ffaa00;
+            border-bottom: 2px solid #00ffaa;
+        }
+        
+        .rank-1 { color: #ffd700; }
+        .rank-2 { color: #c0c0c0; }
+        .rank-3 { color: #cd7f32; }
+        
+        /* Game ASCII Art Container */
+        .game-ascii-header {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 2px solid #00ffaa;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.5);
+        }
+        
+        .ascii-art {
+            font-family: monospace;
+            font-size: 0.6rem;
+            line-height: 1;
+            color: #00ffaa;
+            white-space: pre;
+            text-align: center;
+        }
+        
+        /* Timer Display */
+        .timer-display {
+            font-size: 2rem;
+            color: #ffaa00;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        .timer-display.warning {
+            color: #ff4444;
+            animation: blink 0.5s infinite;
+        }
+        
+        /* Hint Button */
+        .hint-button {
+            padding: 10px 20px;
+            background: transparent;
+            border: 2px solid #ffaa00;
+            color: #ffaa00;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            transition: all 0.3s;
+        }
+        
+        .hint-button:hover:not(:disabled) {
+            background: #ffaa00;
+            color: #000;
+        }
+        
+        .hint-button:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+        
+        /* Post Game Menu */
+        #postGameMenu .start-button {
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        #postGameMenu .start-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px currentColor;
+        }
+        
+        /* Tournament Badge */
+        .tournament-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(255, 170, 0, 0.2);
+            border: 2px solid #ffaa00;
+            border-radius: 20px;
+            color: #ffaa00;
+            font-size: 0.9rem;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Sound Control */
+        .sound-control {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            z-index: 500;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .sound-btn {
+            padding: 8px 15px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid #00ffaa;
+            color: #00ffaa;
+            cursor: pointer;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .sound-btn:hover {
+            background: #00ffaa;
+            color: #000;
+        }
+        
+        .sound-btn.muted {
+            border-color: #ff4444;
+            color: #ff4444;
+        }
+        
+        /* Mode Badge */
+        .mode-badge {
+            display: inline-block;
+            padding: 3px 10px;
+            background: rgba(0, 255, 170, 0.2);
+            border: 1px solid #00ffaa;
+            border-radius: 10px;
+            color: #00ffaa;
+            font-size: 0.7rem;
+            margin-left: 10px;
+        }
+        
+        /* Word reveal animation */
+        .word-reveal {
+            animation: revealPulse 0.5s ease-in-out;
+        }
+        
+        @keyframes revealPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-thumb { background: #00ffaa; border-radius: 4px; }
+    </style>
+</head>
+<body tabindex="0" id="gameBody">
+    <!-- Sound Controls -->
+    <div class="sound-control">
+        <button class="sound-btn" id="musicBtn">🎵 Music: ON</button>
+        <button class="sound-btn" id="sfxBtn">🔊 SFX: ON</button>
+    </div>
+
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loading-title">⚔ SMART GAMES SUITE PRO 🛡</div>
+        <div class="loading-bar-container">
+            <div class="loading-bar" id="loadingBar"></div>
+        </div>
+        <div class="loading-text" id="loadingText">Initializing...</div>
+        <div class="loading-percent" id="loadingPercent">0%</div>
+    </div>
+
+    <!-- Start Screen -->
+    <div class="game-container">
+        <div class="start-screen" id="startScreen">
+            <div class="game-logo">⚔ SMART GAMES SUITE PRO 🛡</div>
+            <div class="game-subtitle">★ Ultimate Edition ★</div>
+            <button class="start-button" id="startBtn">▶ PRESS ENTER ◀</button>
+            <p style="margin-top: 2rem; color: #666; font-size: 0.8rem;">Press F1 for Help | ESC for Menu</p>
+        </div>
+
+        <!-- Main Menu -->
+        <div class="menu-box" id="mainMenu">
+            <div class="menu-title">★ MAIN MENU ★</div>
+            <div class="menu-items" id="mainMenuItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> 🎮 Play a Game</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 🏆 View Leaderboard</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> 📊 Statistics</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> ⚙ Settings</div>
+                <div class="menu-item" data-index="4"><span class="arrow">▶</span> ❌ Exit</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select | ESC to Go Back</div>
+        </div>
+
+        <!-- Game Selection Menu -->
+        <div class="menu-box" id="gameSelectMenu" style="display: none;">
+            <div class="menu-title">🎮 SELECT GAME 🎮</div>
+            <div class="menu-items" id="gameSelectItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> ⚔ Tic-Tac-Toe</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 💡 Word Guess</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Mode Selection Menu -->
+        <div class="menu-box" id="modeSelectMenu" style="display: none;">
+            <div class="menu-title">⚡ SELECT MODE ⚡</div>
+            <div class="menu-items" id="modeSelectItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> ⚡ General Mode</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> ⏱ Timer Mode</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> 🏆 Tournament Mode (Best of 3)</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Timer Selection Menu -->
+        <div class="menu-box" id="timerSelectMenu" style="display: none;">
+            <div class="menu-title">⏱ SELECT TIME ⏱</div>
+            <div class="menu-items" id="timerSelectItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> 30 Seconds</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 60 Seconds</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> 90 Seconds</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> 120 Seconds</div>
+                <div class="menu-item" data-index="4"><span class="arrow">▶</span> Custom Time</div>
+                <div class="menu-item" data-index="5"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Player Selection Menu -->
+        <div class="menu-box" id="playerSelectMenu" style="display: none;">
+            <div class="menu-title">👥 SELECT PLAYERS 👥</div>
+            <div class="menu-items" id="playerSelectItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> 🤖 Player vs Computer</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 👥 2 Players</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Difficulty Selection Menu -->
+        <div class="menu-box" id="difficultyMenu" style="display: none;">
+            <div class="menu-title">🧠 SELECT DIFFICULTY 🧠</div>
+            <div class="menu-items" id="difficultyItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> 🟢 Easy</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 🟡 Medium</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> 🔴 Hard</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint" id="difficultyHint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Style Selection Menu (TTT only) -->
+        <div class="menu-box" id="styleMenu" style="display: none;">
+            <div class="menu-title">🎨 SELECT STYLE 🎨</div>
+            <div class="menu-items" id="styleItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> Classic (X / O)</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> Modern (✗ / ○)</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> Stylish (⚔ / 🛡)</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> Neon (✦ / ◈)</div>
+                <div class="menu-item" data-index="4"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Category Selection Menu (Word Guess only) -->
+        <div class="menu-box" id="categoryMenu" style="display: none;">
+            <div class="menu-title">📚 SELECT CATEGORY 📚</div>
+            <div class="menu-items" id="categoryItems"></div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Guesser Mode Selection (Word Guess only) -->
+        <div class="menu-box" id="guesserModeMenu" style="display: none;">
+            <div class="menu-title">🎯 WHO GUESSES? 🎯</div>
+            <div class="menu-items" id="guesserModeItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> 🧠 Human Guesser (AI thinks word)</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 🤖 AI Guesser (You think word)</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Leaderboard Menu -->
+        <div class="menu-box" id="leaderboardMenu" style="display: none;">
+            <div class="menu-title">🏆 LEADERBOARD 🏆</div>
+            <div class="menu-items" id="leaderboardItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> ⚔ Tic-Tac-Toe</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 💡 Word Guess</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> 🗑 Reset All</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Leaderboard Display -->
+        <div class="menu-box" id="leaderboardDisplay" style="display: none; min-width: 600px;">
+            <div class="menu-title" id="leaderboardTitle">🏆 LEADERBOARD 🏆</div>
+            <div id="leaderboardContent" style="max-height: 400px; overflow-y: auto;"></div>
+            <div class="menu-hint">Press ESC or Enter to go back</div>
+        </div>
+
+        <!-- Settings Menu -->
+        <div class="menu-box" id="settingsMenu" style="display: none;">
+            <div class="menu-title">⚙ SETTINGS ⚙</div>
+            <div class="menu-items" id="settingsItems">
+                <div class="menu-item" data-index="0"><span class="arrow">▶</span> 🎵 Music: ON</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 🔊 Sound Effects: ON</div>
+                <div class="menu-item" data-index="2"><span class="arrow">▶</span> 📊 Export Report</div>
+                <div class="menu-item" data-index="3"><span class="arrow">▶</span> ↩ Back</div>
+            </div>
+            <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
+        </div>
+
+        <!-- Statistics Display -->
+        <div class="menu-box" id="statsDisplay" style="display: none; min-width: 500px;">
+            <div class="menu-title">📊 SESSION STATISTICS 📊</div>
+            <div id="statsContent" style="padding: 20px;"></div>
+            <div class="menu-hint">Press ESC or Enter to go back</div>
+        </div>
+
+        <!-- Game Screen -->
+        <div class="game-screen" id="gameScreen">
+            <div class="game-ascii-header" id="gameAsciiHeader">
+                <pre class="ascii-art" id="gameAsciiArt"></pre>
+            </div>
+
+            <div class="game-panels">
+                <!-- TTT Panel -->
+                <div class="game-panel" id="tttPanel">
+                    <div class="panel-title">
+                        <span>⚔ TIC-TAC-TOE 🛡</span>
+                        <span id="tttTournamentBadge" class="tournament-badge" style="display: none; margin-left: 10px; font-size: 0.7rem;"></span>
+                    </div>
+                    <div class="ttt-board" id="tttBoard"></div>
+                    <div class="ai-thinking" id="tttAiThinking">🤖 Computer is thinking<span id="thinkingDots">...</span></div>
+                    <div id="tttInfo" style="text-align: center; margin-top: 20px;"></div>
+                    <div class="timer-display" id="tttTimer" style="display: none;"></div>
+                </div>
+
+                <!-- Word Guess Panel -->
+                <div class="game-panel" id="wordPanel">
+                    <div class="panel-title">
+                        💡 WORD GUESS 💡
+                        <span class="mode-badge" id="guesserModeBadge"></span>
+                    </div>
+                    <div style="text-align: center; margin-bottom: 10px;">
+                        <span class="category-badge" id="categoryBadge">Category</span>
+                        <span class="difficulty-badge" id="difficultyBadge">Difficulty</span>
+                    </div>
+                    <div class="word-display" id="wordDisplay"></div>
+                    <div class="timer-bar-container" id="timerBarContainer" style="display: none;">
+                        <div class="timer-bar" id="timerBar"></div>
+                    </div>
+                    <div class="timer-display" id="wordTimer" style="display: none;"></div>
+                    <div class="ai-thinking" id="wordAiThinking">🤖 Computer is thinking<span id="wordThinkingDots">...</span></div>
+                    <div class="word-stats" id="wordStats">
+                        <div class="stat-item"><span>📏 Word:</span><span id="wordLength">? letters</span></div>
+                        <div class="stat-item"><span>💖 Chances:</span><span id="totalChances">10</span></div>
+                        <div class="stat-item"><span>✨ Left:</span><span id="remainingChances">10</span></div>
+                        <div class="stat-item"><span>🔮 Hints:</span><span id="hintsLeft">3</span></div>
+                        <div class="stat-item"><span>📊 Score:</span><span id="currentScore">0</span></div>
+                        <div class="stat-item"><span>🎯 Progress:</span><span id="guessProgress">0%</span></div>
+                        <div class="stat-item" style="grid-column: span 2;"><span>🚫 Wrong:</span><span class="wrong-letters" id="wrongLetters">-</span></div>
+                        <div class="stat-item" style="grid-column: span 2;"><span>✅ Correct:</span><span class="correct-letters" id="correctLetters">-</span></div>
+                    </div>
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button class="hint-button" id="hintBtn">💡 Use Hint (Press 0)</button>
+                    </div>
+                    <div id="keyboardPrompt" style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(0,255,170,0.1); border: 1px solid #00ffaa; border-radius: 5px;">
+                        <div style="color: #00ffaa; font-size: 0.9rem;">⌨️ Type A-Z to guess a letter</div>
+                        <div style="color: #888; font-size: 0.8rem; margin-top: 5px;">Press 0 for hint | ESC for menu</div>
+                    </div>
+                    <div id="lastKeyPressed" style="text-align: center; margin-top: 10px; font-size: 1.2rem; color: #ffaa00; min-height: 30px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Status Bar -->
+        <div class="game-status" id="gameStatus" style="display: none;">
+            <div class="status-left">
+                <div class="status-item" id="tournamentStatus" style="display: none;">
+                    <span style="color: #ffaa00;">🏆</span>
+                    <span id="tournamentRoundDisplay">Round 1/3</span>
+                    <span style="color: #888;">|</span>
+                    <span id="tournamentScoreDisplay">0-0</span>
+                </div>
+                <div class="status-item">
+                    <span>👤</span>
+                    <span id="player1Name">Player</span>
+                    <span style="color: #00ffaa;" id="player1Score">0</span>
+                </div>
+                <div class="status-item">
+                    <span>👤</span>
+                    <span id="player2Name">Computer</span>
+                    <span style="color: #ff4444;" id="player2Score">0</span>
+                </div>
+                <div class="status-item">
+                    <span>⚖ Draws:</span>
+                    <span id="drawCount">0</span>
+                </div>
+            </div>
+            <div class="status-right">
+                <div class="status-item"><span id="currentTurn">Your Turn</span></div>
+                <div class="status-item" id="modeDisplay" style="color: #ffaa00;">⚡ General</div>
+                <div class="status-item" style="color: #666;">ESC=Menu | F1=Help</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Victory Overlay -->
+    <div class="victory-overlay" id="victoryOverlay">
+        <div class="victory-title" id="victoryTitle">🎉 VICTORY! 🎉</div>
+        <div class="victory-details" id="victoryDetails">Player wins the game!</div>
+        <div id="revealedWordDisplay" style="font-size: 2rem; color: #ffaa00; margin: 20px 0; letter-spacing: 10px;"></div>
+        <div class="victory-score" id="victoryScore">Score: +100</div>
+        <div id="tournamentInfo" style="font-size: 1.2rem; color: #00ffaa; margin-bottom: 1rem;"></div>
+        <div id="postGameMenu" style="display: flex; flex-direction: column; gap: 15px; margin-top: 20px;">
+            <button class="start-button" id="playAgainBtn" style="animation: none; padding: 15px 40px; border-color: #00ffaa; color: #00ffaa;">🔄 Play Again</button>
+            <button class="start-button" id="changeSettingsBtn" style="animation: none; padding: 15px 40px; border-color: #ffaa00; color: #ffaa00;">⚙ Change Settings</button>
+            <button class="start-button" id="mainMenuBtn" style="animation: none; padding: 15px 40px; border-color: #ff4444; color: #ff4444;">🏠 Main Menu</button>
+        </div>
+    </div>
+
+    <!-- Input Modal -->
+    <div class="input-modal" id="inputModal">
+        <div class="input-box">
+            <div id="inputPrompt" style="font-size: 1.2rem; color: #ffaa00;">Enter your name:</div>
+            <input type="text" id="nameInput" maxlength="20" placeholder="Your name" autocomplete="off">
+            <div style="margin-top: 15px; color: #666; font-size: 0.8rem;">Type name → Press Enter (no confirmation needed)</div>
+            <div style="margin-top: 5px; color: #444; font-size: 0.7rem;">ESC to go back</div>
+        </div>
+    </div>
+
+    <!-- Computer Guess Word Input -->
+    <div class="input-modal" id="wordInputModal">
+        <div class="input-box">
+            <div style="font-size: 1.5rem; color: #ffaa00; margin-bottom: 20px;">🤔 Think of a Word!</div>
+            <div id="wordInputPrompt" style="font-size: 1rem; color: #00ffaa;">Enter a word for the computer to guess:</div>
+            <input type="text" id="secretWordInput" maxlength="20" placeholder="Your secret word" style="text-transform: uppercase;">
+            <div style="margin-top: 15px; color: #666; font-size: 0.8rem;">Only letters A-Z | Press Enter to confirm</div>
+        </div>
+    </div>
+
+    <!-- Help Overlay -->
+    <div class="victory-overlay" id="helpOverlay" style="display: none;">
+        <div style="background: rgba(0,0,0,0.95); border: 3px solid #00ffaa; border-radius: 10px; padding: 30px; max-width: 600px;">
+            <div style="font-size: 1.5rem; color: #ffaa00; margin-bottom: 20px; text-align: center;">★ HELP & CONTROLS ★</div>
+            <div style="line-height: 2; font-size: 0.9rem;">
+                <div style="color: #00ffaa; font-weight: bold;">═══ TIC-TAC-TOE ═══</div>
+                <div>Arrow Keys / Numbers 1-9 - Select cell</div>
+                <div>Enter / Space - Place symbol</div>
+                <div style="color: #00ffaa; font-weight: bold; margin-top: 15px;">═══ WORD GUESS ═══</div>
+                <div>A-Z Keys - Guess a letter</div>
+                <div>0 (Zero) - Use hint</div>
+                <div style="color: #00ffaa; font-weight: bold; margin-top: 15px;">═══ GLOBAL ═══</div>
+                <div>F1 - Help</div>
+                <div>ESC - Pause/Menu</div>
+                <div>Ctrl+K - End current game</div>
+            </div>
+            <div style="text-align: center; margin-top: 20px; color: #666;">Press any key to close</div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== AUDIO SYSTEM - SOFT MELODIC MUSIC ====================
+        const AudioSystem = {
+            musicEnabled: true,
+            sfxEnabled: true,
+            audioContext: null,
+            bgMusicInterval: null,
+            melodyIndex: 0,
+            masterGain: null,
+            currentNotes: [],
+            
+            init() {
+                try {
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.masterGain = this.audioContext.createGain();
+                    this.masterGain.gain.value = 0.25;
+                    this.masterGain.connect(this.audioContext.destination);
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            },
+            
+            resume() {
+                if (this.audioContext && this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+            },
+            
+            // Create a soft piano-like tone
+            playPianoNote(frequency, duration, volume = 0.1, delay = 0) {
+                if (!this.audioContext) return;
+                this.resume();
+                
+                const now = this.audioContext.currentTime + delay;
+                
+                // Main oscillator
+                const osc1 = this.audioContext.createOscillator();
+                const osc2 = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                const filter = this.audioContext.createBiquadFilter();
+                
+                osc1.connect(filter);
+                osc2.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.masterGain);
+                
+                // Soft triangle wave for warmth
+                osc1.type = 'triangle';
+                osc1.frequency.value = frequency;
+                
+                // Add subtle harmonic
+                osc2.type = 'sine';
+                osc2.frequency.value = frequency * 2;
+                
+                // Warm low-pass filter
+                filter.type = 'lowpass';
+                filter.frequency.value = 800;
+                filter.Q.value = 1;
+                
+                // Piano-like envelope: quick attack, slow decay
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(volume, now + 0.02);
+                gain.gain.exponentialRampToValueAtTime(volume * 0.3, now + duration * 0.3);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
+                
+                osc1.start(now);
+                osc2.start(now);
+                osc1.stop(now + duration);
+                osc2.stop(now + duration);
+            },
+            
+            // Create ambient pad
+            playAmbientPad(frequency, duration, volume = 0.03) {
+                if (!this.musicEnabled || !this.audioContext) return;
+                this.resume();
+                
+                const now = this.audioContext.currentTime;
+                
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                const filter = this.audioContext.createBiquadFilter();
+                
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(this.masterGain);
+                
+                osc.type = 'sine';
+                osc.frequency.value = frequency;
+                
+                filter.type = 'lowpass';
+                filter.frequency.value = 300;
+                
+                // Very slow envelope for ambient feel
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(volume, now + 2);
+                gain.gain.setValueAtTime(volume, now + duration - 3);
+                gain.gain.linearRampToValueAtTime(0, now + duration);
+                
+                osc.start(now);
+                osc.stop(now + duration);
+            },
+            
+            // Soft UI click
+            playMenuMove() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                this.playPianoNote(880, 0.1, 0.04);
+            },
+            
+            // Pleasant select chime
+            playMenuSelect() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                this.playPianoNote(523, 0.2, 0.08);
+                this.playPianoNote(659, 0.2, 0.07, 0.08);
+                this.playPianoNote(784, 0.3, 0.09, 0.16);
+            },
+            
+            // Correct guess - gentle ascending arpeggio
+            playCorrect() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                this.playPianoNote(523, 0.2, 0.1);
+                this.playPianoNote(659, 0.2, 0.1, 0.1);
+                this.playPianoNote(784, 0.3, 0.12, 0.2);
+            },
+            
+            // Wrong guess - soft low note
+            playWrong() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                this.playPianoNote(220, 0.4, 0.06);
+                this.playPianoNote(196, 0.5, 0.05, 0.15);
+            },
+            
+            // Victory - beautiful ascending melody
+            playVictory() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                const melody = [
+                    {note: 523, dur: 0.2},  // C
+                    {note: 587, dur: 0.2},  // D
+                    {note: 659, dur: 0.2},  // E
+                    {note: 784, dur: 0.3},  // G
+                    {note: 880, dur: 0.2},  // A
+                    {note: 1047, dur: 0.5}  // High C
+                ];
+                let time = 0;
+                melody.forEach(m => {
+                    this.playPianoNote(m.note, m.dur + 0.2, 0.1, time);
+                    time += m.dur * 0.8;
+                });
+            },
+            
+            // Game over - melancholic descending
+            playGameOver() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                const notes = [392, 349, 330, 294, 262];
+                notes.forEach((freq, i) => {
+                    this.playPianoNote(freq, 0.4, 0.06, i * 0.2);
+                });
+            },
+            
+            // Hint - magical sparkle
+            playHint() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                const notes = [1047, 1175, 1319, 1397, 1568];
+                notes.forEach((freq, i) => {
+                    this.playPianoNote(freq, 0.15, 0.05, i * 0.06);
+                });
+            },
+            
+            // Subtle key press
+            playKeyPress() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                this.playPianoNote(660, 0.08, 0.02);
+            },
+            
+            // Coin flip sound
+            playCoinFlip() {
+                if (!this.sfxEnabled || !this.audioContext) return;
+                for (let i = 0; i < 10; i++) {
+                    const freq = 600 + Math.sin(i * 0.5) * 200;
+                    this.playPianoNote(freq, 0.08, 0.04, i * 0.08);
+                }
+            },
+            
+            // Soft melodic background music
+            startBgMusic() {
+                if (!this.musicEnabled || this.bgMusicInterval) return;
+                
+                // Beautiful chord progressions (C major - Am - F - G)
+                const chordProgressions = [
+                    [130.81, 164.81, 196.00],  // C major (C3, E3, G3)
+                    [110.00, 130.81, 164.81],  // A minor (A2, C3, E3)
+                    [87.31, 110.00, 130.81],   // F major (F2, A2, C3)
+                    [98.00, 123.47, 146.83],   // G major (G2, B2, D3)
+                ];
+                
+                // Gentle melody notes that float over chords
+                const melodyNotes = [
+                    [392, 440, 523, 494],      // G4, A4, C5, B4
+                    [523, 494, 440, 392],      // C5, B4, A4, G4
+                    [349, 392, 440, 523],      // F4, G4, A4, C5
+                    [392, 494, 523, 587],      // G4, B4, C5, D5
+                ];
+                
+                const playSection = () => {
+                    if (!this.musicEnabled) return;
+                    
+                    const chordIndex = this.melodyIndex % chordProgressions.length;
+                    const chord = chordProgressions[chordIndex];
+                    const melody = melodyNotes[chordIndex];
+                    
+                    // Play ambient pad chord
+                    chord.forEach((note, i) => {
+                        this.playAmbientPad(note, 8, 0.02);
+                    });
+                    
+                    // Play gentle melody notes
+                    melody.forEach((note, i) => {
+                        setTimeout(() => {
+                            if (this.musicEnabled) {
+                                this.playPianoNote(note, 1.5, 0.03);
+                            }
+                        }, i * 1800 + 500);
+                    });
+                    
+                    this.melodyIndex++;
+                };
+                
+                playSection();
+                this.bgMusicInterval = setInterval(playSection, 8000);
+            },
+            
+            stopBgMusic() {
+                if (this.bgMusicInterval) {
+                    clearInterval(this.bgMusicInterval);
+                    this.bgMusicInterval = null;
+                }
+            },
+            
+            toggleMusic() {
+                this.musicEnabled = !this.musicEnabled;
+                if (this.musicEnabled) this.startBgMusic();
+                else this.stopBgMusic();
+                return this.musicEnabled;
+            },
+            
+            toggleSfx() {
+                this.sfxEnabled = !this.sfxEnabled;
+                return this.sfxEnabled;
+            }
+        };
+
+        // ==================== GAME STATE ====================
+        const GameState = {
+            currentScreen: 'loading',
+            currentMenu: null,
+            selectedIndex: 0,
+            selectedGame: null,
+            selectedMode: null,
+            selectedTime: 60,
+            playerMode: null,
+            difficulty: null,
+            style: null,
+            category: null,
+            guesserMode: 'human',
+            player1Name: 'Player 1',
+            player2Name: 'Computer',
+            player1Score: 0,
+            player2Score: 0,
+            draws: 0,
+            tournamentRound: 1,
+            tournamentTotalRounds: 3,
+            tournamentP1Wins: 0,
+            tournamentP2Wins: 0,
+            tournamentActive: false,
+            // 2 Player Word Guess specific
+            wordGuesser: null,
+            wordThinker: null,
+            wordThinkerIndex: 0,
+            sessionStats: {
+                gamesPlayed: 0,
+                gamesWon: 0,
+                hintsUsed: 0,
+                perfectGames: 0,
+                mistakes: 0,
+                startTime: Date.now()
+            }
+        };
+
+        // ==================== TTT GAME STATE ====================
+        const TTTGame = {
+            board: ['', '', '', '', '', '', '', '', ''],
+            currentPlayer: 'X',
+            cursorPos: 4,
+            gameActive: false,
+            winningCells: [],
+            styles: {
+                classic: { X: 'X', O: 'O' },
+                modern: { X: '✗', O: '○' },
+                stylish: { X: '⚔', O: '🛡' },
+                neon: { X: '✦', O: '◈' }
+            }
+        };
+
+        // ==================== WORD GAME STATE ====================
+        const WordGame = {
+            word: '',
+            shown: '',
+            wrongLetters: [],
+            correctLetters: [],
+            totalChances: 10,
+            remainingChances: 10,
+            hintsMax: 3,
+            hintsUsed: 0,
+            score: 0,
+            gameActive: false,
+            timeRemaining: 0,
+            timerInterval: null,
+            computerGuessing: false,
+            computerGuessedLetters: [],
+            letterFrequency: 'etaoinshrdlcumwfgypbvkjxqz',
+            currentPlayerIndex: 0  // For 2 player mode
+        };
+
+        // ==================== WORD CATEGORIES ====================
+        const categories = {
+            easy: {
+                animals: ['elephant', 'giraffe', 'dolphin', 'penguin', 'butterfly', 'monkey', 'tiger', 'zebra', 'panda', 'koala'],
+                fruits: ['strawberry', 'pineapple', 'watermelon', 'blueberry', 'raspberry', 'mango', 'orange', 'grape', 'cherry', 'banana'],
+                colors: ['turquoise', 'magenta', 'lavender', 'crimson', 'burgundy', 'mustard', 'scarlet', 'emerald', 'sapphire', 'golden'],
+                food: ['pizza', 'burger', 'pasta', 'sandwich', 'chocolate', 'pancake', 'waffle', 'taco', 'burrito', 'cookie']
+            },
+            medium: {
+                sports: ['basketball', 'volleyball', 'swimming', 'badminton', 'cricket', 'football', 'tennis', 'hockey', 'baseball', 'boxing'],
+                vehicles: ['helicopter', 'submarine', 'motorcycle', 'ambulance', 'limousine', 'bulldozer', 'spaceship', 'scooter', 'sailboat', 'tractor'],
+                instruments: ['saxophone', 'xylophone', 'accordion', 'harmonica', 'trombone', 'clarinet', 'mandolin', 'tambourine', 'bagpipes', 'keyboard'],
+                knowledge: ['adventure', 'mystery', 'treasure', 'pyramid', 'empire', 'galaxy', 'planet', 'universe', 'history', 'democracy']
+            },
+            hard: {
+                programming: ['algorithm', 'javascript', 'framework', 'encryption', 'recursion', 'debugging', 'compiler', 'database', 'protocol', 'variable'],
+                movies: ['inception', 'interstellar', 'gladiator', 'casablanca', 'godfather', 'memento', 'dunkirk', 'spotlight', 'whiplash', 'parasite'],
+                technology: ['smartphone', 'blockchain', 'artificial', 'cybersecurity', 'cryptocurrency', 'autonomous', 'biometric', 'hologram', 'nanotechnology', 'quantum'],
+                nature: ['archipelago', 'avalanche', 'ecosystem', 'atmosphere', 'biodiversity', 'photosynthesis', 'evaporation', 'precipitation', 'conservation', 'deforestation']
+            }
+        };
+
+        // ==================== LEADERBOARD ====================
+        let tttLeaderboard = JSON.parse(localStorage.getItem('tttLeaderboard')) || [];
+        let wordLeaderboard = JSON.parse(localStorage.getItem('wordLeaderboard')) || [];
+
+        // ==================== ASCII ART ====================
+        const asciiArt = {
+            ttt: ` _____ ___ ____   _____  _    ____   _____ ___  _____ 
+|_   _|_ _/ ___| |_   _|/ \\  / ___| |_   _/ _ \\| ____|
+  | |  | | |       | | / _ \\| |       | || | | |  _|  
+  | |  | | |___    | |/ ___ \\ |___    | || |_| | |___ 
+  |_| |___|\\____|   |_/_/   \\_\\____|   |_| \\___/|_____|`,
+            word: ` __        _____  ____  ____     ____ _   _ _____ ____ ____  
+ \\ \\      / / _ \\|  _ \\|  _ \\   / ___| | | | ____/ ___/ ___| 
+  \\ \\ /\\ / / | | | |_) | | | | | |  _| | | |  _| \\___ \\___ \\ 
+   \\ V  V /| |_| |  _ <| |_| | | |_| | |_| | |___ ___) |__) |
+    \\_/\\_/  \\___/|_| \\_\\____/   \\____|\\___/|_____|____/____/ `
+        };
+
+        // ==================== LOADING SCREEN ====================
+        function runLoadingScreen() {
+            const loadingBar = document.getElementById('loadingBar');
+            const loadingText = document.getElementById('loadingText');
+            const loadingPercent = document.getElementById('loadingPercent');
+            
+            const messages = ['Initializing...', 'Loading Assets...', 'Preparing Games...', 'Setting Up AI...', 'Almost Ready...', 'Ready to Play!'];
+            
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 100) progress = 100;
+                
+                loadingBar.style.width = progress + '%';
+                loadingPercent.textContent = Math.floor(progress) + '%';
+                loadingText.textContent = messages[Math.floor(progress / 20)];
+                
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        document.getElementById('loadingScreen').style.display = 'none';
+                        AudioSystem.init();
+                        showStartScreen();
+                    }, 500);
+                }
+            }, 100);
+        }
+
+        // ==================== SCREEN MANAGEMENT ====================
+        function hideAllScreens() {
+            ['startScreen', 'mainMenu', 'gameSelectMenu', 'modeSelectMenu', 'timerSelectMenu', 
+             'playerSelectMenu', 'difficultyMenu', 'styleMenu', 'categoryMenu', 'guesserModeMenu',
+             'leaderboardMenu', 'leaderboardDisplay', 'settingsMenu', 'statsDisplay', 
+             'gameScreen', 'gameStatus'].forEach(id => {
+                document.getElementById(id).style.display = 'none';
+            });
+        }
+
+        function showStartScreen() {
+            hideAllScreens();
+            document.getElementById('startScreen').style.display = 'flex';
+            GameState.currentScreen = 'start';
+            GameState.currentMenu = null;
+        }
+
+        function showMenu(menuId) {
+            hideAllScreens();
+            document.getElementById(menuId).style.display = 'block';
+            GameState.currentMenu = menuId;
+            GameState.currentScreen = 'menu';
+            GameState.selectedIndex = 0;
+            updateMenuSelection(menuId);
+            AudioSystem.resume();
+        }
+
+        function updateMenuSelection(menuId) {
+            const menu = document.getElementById(menuId);
+            const items = menu.querySelectorAll('.menu-item');
+            items.forEach((item, index) => {
+                item.classList.toggle('selected', index === GameState.selectedIndex);
+            });
+        }
+
+        // ==================== MENU NAVIGATION ====================
+        function handleMenuNavigation(key) {
+            if (!GameState.currentMenu) return;
+            
+            const menu = document.getElementById(GameState.currentMenu);
+            const items = menu.querySelectorAll('.menu-item');
+            const maxIndex = items.length - 1;
+            
+            if (key === 'ArrowUp') {
+                GameState.selectedIndex = Math.max(0, GameState.selectedIndex - 1);
+                updateMenuSelection(GameState.currentMenu);
+                AudioSystem.playMenuMove();
+            } else if (key === 'ArrowDown') {
+                GameState.selectedIndex = Math.min(maxIndex, GameState.selectedIndex + 1);
+                updateMenuSelection(GameState.currentMenu);
+                AudioSystem.playMenuMove();
+            } else if (key === 'Enter') {
+                AudioSystem.playMenuSelect();
+                handleMenuSelect();
+            } else if (key === 'Escape') {
+                handleMenuBack();
+            }
+        }
+
+        function handleMenuSelect() {
+            const menuId = GameState.currentMenu;
+            const index = GameState.selectedIndex;
+            
+            switch (menuId) {
+                case 'mainMenu': handleMainMenuSelect(index); break;
+                case 'gameSelectMenu': handleGameSelectMenu(index); break;
+                case 'modeSelectMenu': handleModeSelectMenu(index); break;
+                case 'timerSelectMenu': handleTimerSelectMenu(index); break;
+                case 'playerSelectMenu': handlePlayerSelectMenu(index); break;
+                case 'difficultyMenu': handleDifficultyMenu(index); break;
+                case 'styleMenu': handleStyleMenu(index); break;
+                case 'categoryMenu': handleCategoryMenu(index); break;
+                case 'guesserModeMenu': handleGuesserModeMenu(index); break;
+                case 'leaderboardMenu': handleLeaderboardMenu(index); break;
+                case 'leaderboardDisplay': showMenu('leaderboardMenu'); break;
+                case 'settingsMenu': handleSettingsMenu(index); break;
+                case 'statsDisplay': showMenu('mainMenu'); break;
+            }
+        }
+
+        function handleMenuBack() {
+            const backs = {
+                'mainMenu': showStartScreen,
+                'gameSelectMenu': () => showMenu('mainMenu'),
+                'modeSelectMenu': () => showMenu('gameSelectMenu'),
+                'timerSelectMenu': () => showMenu('modeSelectMenu'),
+                'playerSelectMenu': () => showMenu(GameState.selectedMode === 'timer' ? 'timerSelectMenu' : 'modeSelectMenu'),
+                'difficultyMenu': () => showMenu('playerSelectMenu'),
+                'styleMenu': () => showMenu('difficultyMenu'),
+                'categoryMenu': () => showMenu('difficultyMenu'),
+                'guesserModeMenu': () => showMenu('categoryMenu'),
+                'leaderboardMenu': () => showMenu('mainMenu'),
+                'leaderboardDisplay': () => showMenu('leaderboardMenu'),
+                'settingsMenu': () => showMenu('mainMenu'),
+                'statsDisplay': () => showMenu('mainMenu')
+            };
+            if (backs[GameState.currentMenu]) backs[GameState.currentMenu]();
+        }
+
+        // ==================== MENU HANDLERS ====================
+        function handleMainMenuSelect(index) {
+            switch (index) {
+                case 0: showMenu('gameSelectMenu'); break;
+                case 1: showMenu('leaderboardMenu'); break;
+                case 2: showStatistics(); break;
+                case 3: showMenu('settingsMenu'); break;
+                case 4: showStartScreen(); break;
+            }
+        }
+
+        function handleGameSelectMenu(index) {
+            switch (index) {
+                case 0: GameState.selectedGame = 'ttt'; showMenu('modeSelectMenu'); break;
+                case 1: GameState.selectedGame = 'word'; showMenu('modeSelectMenu'); break;
+                case 2: showMenu('mainMenu'); break;
+            }
+        }
+
+        function handleModeSelectMenu(index) {
+            switch (index) {
+                case 0:
+                    GameState.selectedMode = 'general';
+                    GameState.tournamentActive = false;
+                    showMenu('playerSelectMenu');
+                    break;
+                case 1:
+                    GameState.selectedMode = 'timer';
+                    GameState.tournamentActive = false;
+                    showMenu('timerSelectMenu');
+                    break;
+                case 2:
+                    GameState.selectedMode = 'tournament';
+                    GameState.tournamentActive = true;
+                    GameState.tournamentRound = 1;
+                    GameState.tournamentP1Wins = 0;
+                    GameState.tournamentP2Wins = 0;
+                    showMenu('playerSelectMenu');
+                    break;
+                case 3: showMenu('gameSelectMenu'); break;
+            }
+        }
+
+        function handleTimerSelectMenu(index) {
+            const times = [30, 60, 90, 120];
+            if (index < 4) {
+                GameState.selectedTime = times[index];
+                showMenu('playerSelectMenu');
+            } else if (index === 4) {
+                const time = prompt('Enter time in seconds (30-300):', '60');
+                if (time) {
+                    const t = parseInt(time);
+                    if (t >= 30 && t <= 300) {
+                        GameState.selectedTime = t;
+                        showMenu('playerSelectMenu');
+                    }
+                }
+            } else {
+                showMenu('modeSelectMenu');
+            }
+        }
+
+        function handlePlayerSelectMenu(index) {
+            switch (index) {
+                case 0:
+                    GameState.playerMode = 'ai';
+                    GameState.player2Name = 'Computer';
+                    showMenu('difficultyMenu');
+                    break;
+                case 1:
+                    GameState.playerMode = '2player';
+                    if (GameState.selectedGame === 'ttt') {
+                        GameState.difficulty = 'medium';
+                        showMenu('styleMenu');
+                    } else {
+                        // Word Guess 2 player - need to select difficulty first
+                        showMenu('difficultyMenu');
+                    }
+                    break;
+                case 2:
+                    showMenu(GameState.selectedMode === 'timer' ? 'timerSelectMenu' : 'modeSelectMenu');
+                    break;
+            }
+        }
+
+        function handleDifficultyMenu(index) {
+            const difficulties = ['easy', 'medium', 'hard'];
+            if (index < 3) {
+                GameState.difficulty = difficulties[index];
+                if (GameState.selectedGame === 'ttt') {
+                    showMenu('styleMenu');
+                } else {
+                    populateCategoryMenu();
+                    showMenu('categoryMenu');
+                }
+            } else {
+                showMenu('playerSelectMenu');
+            }
+        }
+
+        function handleStyleMenu(index) {
+            const styles = ['classic', 'modern', 'stylish', 'neon'];
+            if (index < 4) {
+                GameState.style = styles[index];
+                startPlayerNameEntry();
+            } else {
+                showMenu('difficultyMenu');
+            }
+        }
+
+        function populateCategoryMenu() {
+            const container = document.getElementById('categoryItems');
+            container.innerHTML = '';
+            
+            const diff = GameState.difficulty || 'easy';
+            const catNames = {
+                easy: [{key:'animals',icon:'🦁',name:'Animals'},{key:'fruits',icon:'🍎',name:'Fruits'},{key:'colors',icon:'🎨',name:'Colors'},{key:'food',icon:'🍕',name:'Food'},{key:'random',icon:'🎲',name:'Random'}],
+                medium: [{key:'sports',icon:'⚽',name:'Sports'},{key:'vehicles',icon:'🚗',name:'Vehicles'},{key:'instruments',icon:'🎸',name:'Instruments'},{key:'knowledge',icon:'📖',name:'Knowledge'},{key:'random',icon:'🎲',name:'Random'}],
+                hard: [{key:'programming',icon:'💻',name:'Programming'},{key:'movies',icon:'🎬',name:'Movies'},{key:'technology',icon:'📱',name:'Technology'},{key:'nature',icon:'🌲',name:'Nature'},{key:'random',icon:'🎲',name:'Random'}]
+            };
+            
+            const cats = catNames[diff] || catNames.easy;
+            cats.forEach((cat, i) => {
+                const div = document.createElement('div');
+                div.className = 'menu-item';
+                div.dataset.index = i;
+                div.dataset.category = cat.key;
+                div.innerHTML = `<span class="arrow">▶</span> ${cat.icon} ${cat.name}`;
+                container.appendChild(div);
+            });
+            
+            const backDiv = document.createElement('div');
+            backDiv.className = 'menu-item';
+            backDiv.dataset.index = cats.length;
+            backDiv.innerHTML = '<span class="arrow">▶</span> ↩ Back';
+            container.appendChild(backDiv);
+        }
+
+        function handleCategoryMenu(index) {
+            const items = document.querySelectorAll('#categoryItems .menu-item');
+            if (index === items.length - 1) {
+                showMenu('difficultyMenu');
+                return;
+            }
+            
+            GameState.category = items[index].dataset.category;
+            
+            if (GameState.playerMode === 'ai') {
+                showMenu('guesserModeMenu');
+            } else {
+                // 2 player mode - go directly to names (no guesser mode menu)
+                GameState.guesserMode = 'human';
+                startPlayerNameEntry();
+            }
+        }
+
+        function handleGuesserModeMenu(index) {
+            switch (index) {
+                case 0:
+                    GameState.guesserMode = 'human';
+                    startPlayerNameEntry();
+                    break;
+                case 1:
+                    GameState.guesserMode = 'computer';
+                    startPlayerNameEntry();
+                    break;
+                case 2:
+                    showMenu('categoryMenu');
+                    break;
+            }
+        }
+
+        function handleLeaderboardMenu(index) {
+            switch (index) {
+                case 0: showLeaderboard('ttt'); break;
+                case 1: showLeaderboard('word'); break;
+                case 2:
+                    if (confirm('Reset all leaderboards?')) {
+                        tttLeaderboard = [];
+                        wordLeaderboard = [];
+                        localStorage.setItem('tttLeaderboard', JSON.stringify(tttLeaderboard));
+                        localStorage.setItem('wordLeaderboard', JSON.stringify(wordLeaderboard));
+                    }
+                    break;
+                case 3: showMenu('mainMenu'); break;
+            }
+        }
+
+        function showLeaderboard(type) {
+            hideAllScreens();
+            document.getElementById('leaderboardDisplay').style.display = 'block';
+            GameState.currentMenu = 'leaderboardDisplay';
+            
+            const data = type === 'ttt' ? tttLeaderboard : wordLeaderboard;
+            document.getElementById('leaderboardTitle').textContent = type === 'ttt' ? '🏆 TIC-TAC-TOE 🏆' : '🏆 WORD GUESS 🏆';
+            
+            if (data.length === 0) {
+                document.getElementById('leaderboardContent').innerHTML = '<p style="text-align:center;padding:30px;color:#666;">No scores yet!</p>';
+            } else {
+                let html = '<table class="leaderboard-table"><thead><tr><th>Rank</th><th>Player</th><th>Wins</th><th>Score</th><th>Date</th></tr></thead><tbody>';
+                data.sort((a, b) => b.score - a.score).slice(0, 10).forEach((e, i) => {
+                    html += `<tr><td class="${i < 3 ? 'rank-' + (i+1) : ''}">${i+1}</td><td>${e.name}</td><td>${e.wins}</td><td>${e.score}</td><td>${e.date || 'N/A'}</td></tr>`;
+                });
+                html += '</tbody></table>';
+                document.getElementById('leaderboardContent').innerHTML = html;
+            }
+        }
+
+        function handleSettingsMenu(index) {
+            switch (index) {
+                case 0:
+                    const musicOn = AudioSystem.toggleMusic();
+                    document.querySelector('#settingsItems .menu-item[data-index="0"]').innerHTML = `<span class="arrow">▶</span> 🎵 Music: ${musicOn ? 'ON' : 'OFF'}`;
+                    document.getElementById('musicBtn').textContent = `🎵 Music: ${musicOn ? 'ON' : 'OFF'}`;
+                    document.getElementById('musicBtn').classList.toggle('muted', !musicOn);
+                    break;
+                case 1:
+                    const sfxOn = AudioSystem.toggleSfx();
+                    document.querySelector('#settingsItems .menu-item[data-index="1"]').innerHTML = `<span class="arrow">▶</span> 🔊 Sound Effects: ${sfxOn ? 'ON' : 'OFF'}`;
+                    document.getElementById('sfxBtn').textContent = `🔊 SFX: ${sfxOn ? 'ON' : 'OFF'}`;
+                    document.getElementById('sfxBtn').classList.toggle('muted', !sfxOn);
+                    break;
+                case 2: exportReport(); break;
+                case 3: showMenu('mainMenu'); break;
+            }
+            updateMenuSelection('settingsMenu');
+        }
+
+        function showStatistics() {
+            hideAllScreens();
+            document.getElementById('statsDisplay').style.display = 'block';
+            GameState.currentMenu = 'statsDisplay';
+            
+            const stats = GameState.sessionStats;
+            const sessionTime = Math.floor((Date.now() - stats.startTime) / 60000);
+            const winRate = stats.gamesPlayed > 0 ? ((stats.gamesWon / stats.gamesPlayed) * 100).toFixed(1) : 0;
+            
+            document.getElementById('statsContent').innerHTML = `
+                <div style="line-height: 2.5;">
+                    <div>⏱ Session: <span style="color: #ffaa00;">${sessionTime} min</span></div>
+                    <div>🎮 Games: <span style="color: #ffaa00;">${stats.gamesPlayed}</span></div>
+                    <div>🏆 Won: <span style="color: #00ff00;">${stats.gamesWon}</span></div>
+                    <div>📊 Win Rate: <span style="color: ${winRate > 50 ? '#00ff00' : '#ff4444'};">${winRate}%</span></div>
+                    <div>💡 Hints: <span style="color: #ffaa00;">${stats.hintsUsed}</span></div>
+                    <div>💎 Perfect: <span style="color: #00ffaa;">${stats.perfectGames}</span></div>
+                    <div>❌ Mistakes: <span style="color: #ff4444;">${stats.mistakes}</span></div>
+                </div>
+            `;
+        }
+
+        function exportReport() {
+            const stats = GameState.sessionStats;
+            const report = `SMART GAMES SUITE PRO - SESSION REPORT\nGenerated: ${new Date().toLocaleString()}\n\nGames Played: ${stats.gamesPlayed}\nGames Won: ${stats.gamesWon}\nHints Used: ${stats.hintsUsed}`;
+            const blob = new Blob([report], { type: 'text/plain' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'GameReport.txt';
+            a.click();
+        }
+
+        // ==================== PLAYER NAME INPUT ====================
+        function startPlayerNameEntry() {
+            hideAllScreens();
+            
+            const modal = document.getElementById('inputModal');
+            const input = document.getElementById('nameInput');
+            const prompt = document.getElementById('inputPrompt');
+            
+            // Remove old input and create fresh one to clear all event listeners
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.id = 'nameInput';
+            newInput.maxLength = 20;
+            newInput.placeholder = 'Your name';
+            newInput.autocomplete = 'off';
+            input.parentNode.replaceChild(newInput, input);
+            
+            // Apply same styles
+            newInput.style.cssText = 'background:#000;border:2px solid #00ffaa;color:#00ffaa;padding:15px 30px;font-size:1.2rem;font-family:Orbitron,monospace;outline:none;text-align:center;';
+            
+            prompt.textContent = GameState.playerMode === '2player' ? 'Enter Player 1 name:' : 'Enter your name:';
+            newInput.value = '';
+            modal.style.display = 'flex';
+            
+            setTimeout(() => newInput.focus(), 100);
+            
+            newInput.onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    const name1 = newInput.value.trim() || 'Player 1';
+                    GameState.player1Name = name1;
+                    
+                    if (GameState.playerMode === '2player') {
+                        // Now get Player 2 name
+                        prompt.textContent = 'Enter Player 2 name:';
+                        newInput.value = '';
+                        newInput.placeholder = 'Player 2 name';
+                        newInput.focus();
+                        
+                        newInput.onkeydown = function(e2) {
+                            if (e2.key === 'Enter') {
+                                e2.preventDefault();
+                                const name2 = newInput.value.trim() || 'Player 2';
+                                GameState.player2Name = name2;
+                                modal.style.display = 'none';
+                                newInput.onkeydown = null;
+                                
+                                if (GameState.selectedGame === 'ttt') {
+                                    startToss();
+                                } else {
+                                    // Word Guess 2 player - toss to decide who enters word
+                                    startWordGuessToss();
+                                }
+                            } else if (e2.key === 'Escape') {
+                                modal.style.display = 'none';
+                                newInput.onkeydown = null;
+                                showMenu(GameState.selectedGame === 'ttt' ? 'styleMenu' : 'categoryMenu');
+                            }
+                        };
+                    } else {
+                        // Single player vs AI
+                        GameState.player2Name = 'Computer';
+                        modal.style.display = 'none';
+                        newInput.onkeydown = null;
+                        
+                        if (GameState.selectedGame === 'word' && GameState.guesserMode === 'computer') {
+                            promptForSecretWord();
+                        } else if (GameState.selectedGame === 'ttt') {
+                            startToss();
+                        } else {
+                            startGame();
+                        }
+                    }
+                } else if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                    newInput.onkeydown = null;
+                    if (GameState.selectedGame === 'ttt') {
+                        showMenu('styleMenu');
+                    } else if (GameState.playerMode === 'ai') {
+                        showMenu('guesserModeMenu');
+                    } else {
+                        showMenu('categoryMenu');
+                    }
+                }
+            };
+        }
+        
+        // ==================== WORD GUESS 2 PLAYER TOSS ====================
+        function startWordGuessToss() {
+            hideAllScreens();
+            
+            const tossDiv = document.createElement('div');
+            tossDiv.id = 'wordTossOverlay';
+            tossDiv.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;';
+            tossDiv.innerHTML = `
+                <div style="font-size:1.5rem;color:#ffaa00;margin-bottom:2rem;">🎲 WORD GUESS TOSS 🎲</div>
+                <div style="font-size:1rem;color:#00ffaa;margin-bottom:1rem;">Who will think the word?</div>
+                <div id="wordCoinAnimation" style="font-size:4rem;margin-bottom:2rem;">●</div>
+                <div id="wordTossResult" style="font-size:1.2rem;color:#00ffaa;"></div>
+            `;
+            document.body.appendChild(tossDiv);
+            
+            AudioSystem.playCoinFlip();
+            
+            const coinFrames = ['●', '◐', '◓', '○', '◑', '◒'];
+            let frame = 0;
+            const coinInterval = setInterval(() => {
+                document.getElementById('wordCoinAnimation').textContent = coinFrames[frame % coinFrames.length];
+                frame++;
+            }, 100);
+            
+            setTimeout(() => {
+                clearInterval(coinInterval);
+                
+                // Randomly decide who enters the word (loser enters, winner guesses)
+                const wordThinkerIndex = Math.random() < 0.5 ? 0 : 1;
+                const wordThinker = wordThinkerIndex === 0 ? GameState.player1Name : GameState.player2Name;
+                const guesser = wordThinkerIndex === 0 ? GameState.player2Name : GameState.player1Name;
+                
+                // Store who is the guesser
+                GameState.wordGuesser = guesser;
+                GameState.wordThinker = wordThinker;
+                GameState.wordThinkerIndex = wordThinkerIndex;
+                
+                document.getElementById('wordTossResult').innerHTML = `
+                    <div style="margin-bottom:1rem;">🎯 RESULT</div>
+                    <div style="font-size:1.2rem;color:#ffaa00;">${wordThinker} will THINK a word</div>
+                    <div style="font-size:1.2rem;color:#00ffaa;margin-top:0.5rem;">${guesser} will GUESS</div>
+                    <div style="margin-top:2rem;color:#666;">Press any key to continue...</div>
+                `;
+                
+                const continueHandler = (e) => {
+                    document.body.removeChild(tossDiv);
+                    document.removeEventListener('keydown', continueHandler);
+                    // Now ask the word thinker to enter a word
+                    promptFor2PlayerWord();
+                };
+                document.addEventListener('keydown', continueHandler);
+            }, 2000);
+        }
+        
+        // ==================== 2 PLAYER WORD INPUT ====================
+        function promptFor2PlayerWord() {
+            const modal = document.getElementById('wordInputModal');
+            const input = document.getElementById('secretWordInput');
+            const promptEl = document.getElementById('wordInputPrompt');
+            
+            // Create fresh input element
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.id = 'secretWordInput';
+            newInput.maxLength = 20;
+            newInput.placeholder = 'Your secret word';
+            newInput.style.cssText = 'background:#000;border:2px solid #00ffaa;color:#00ffaa;padding:15px 30px;font-size:1.2rem;font-family:Orbitron,monospace;outline:none;text-align:center;text-transform:uppercase;';
+            input.parentNode.replaceChild(newInput, input);
+            
+            promptEl.textContent = `${GameState.wordThinker}, enter a word for ${GameState.wordGuesser} to guess:`;
+            modal.style.display = 'flex';
+            
+            setTimeout(() => newInput.focus(), 100);
+            
+            newInput.onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    let word = newInput.value.trim().toUpperCase();
+                    
+                    if (!/^[A-Z]+$/.test(word) || word.length < 3) {
+                        // Show error in the modal
+                        const errorDiv = document.createElement('div');
+                        errorDiv.style.cssText = 'color:#ff4444;margin-top:10px;font-size:0.9rem;';
+                        errorDiv.textContent = 'Enter a valid word (3+ letters, A-Z only)';
+                        errorDiv.id = 'wordError';
+                        
+                        const existing = document.getElementById('wordError');
+                        if (existing) existing.remove();
+                        newInput.parentNode.appendChild(errorDiv);
+                        
+                        setTimeout(() => {
+                            const err = document.getElementById('wordError');
+                            if (err) err.remove();
+                        }, 2000);
+                        return;
+                    }
+                    
+                    modal.style.display = 'none';
+                    newInput.onkeydown = null;
+                    start2PlayerWordGame(word);
+                } else if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                    newInput.onkeydown = null;
+                    showMenu('categoryMenu');
+                }
+            };
+        }
+        
+        // ==================== 2 PLAYER WORD GAME ====================
+        function start2PlayerWordGame(secretWord) {
+            hideAllScreens();
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('gameStatus').style.display = 'flex';
+            
+            GameState.currentMenu = null;
+            GameState.currentScreen = 'game';
+            GameState.selectedGame = 'word';
+            
+            document.getElementById('gameAsciiArt').textContent = asciiArt.word;
+            document.getElementById('player1Name').textContent = GameState.player1Name;
+            document.getElementById('player2Name').textContent = GameState.player2Name;
+            
+            document.getElementById('modeDisplay').innerHTML = '👥 2 Players';
+            document.getElementById('tournamentStatus').style.display = 'none';
+            
+            document.getElementById('wordPanel').classList.remove('inactive');
+            document.getElementById('tttPanel').classList.add('inactive');
+            
+            document.getElementById('guesserModeBadge').textContent = `🎯 ${GameState.wordGuesser} Guessing`;
+            
+            WordGame.word = secretWord;
+            WordGame.shown = '_'.repeat(secretWord.length);
+            WordGame.wrongLetters = [];
+            WordGame.correctLetters = [];
+            WordGame.computerGuessing = false;
+            WordGame.score = 0;
+            
+            const wordLength = secretWord.length;
+            const diff = GameState.difficulty || 'medium';
+            
+            switch(diff) {
+                case 'easy': 
+                    WordGame.totalChances = Math.max(10, wordLength + 4); 
+                    WordGame.hintsMax = 3;
+                    break;
+                case 'medium': 
+                    WordGame.totalChances = Math.max(7, wordLength + 2); 
+                    WordGame.hintsMax = 2;
+                    break;
+                case 'hard': 
+                    WordGame.totalChances = Math.max(5, wordLength); 
+                    WordGame.hintsMax = 1;
+                    break;
+            }
+            
+            WordGame.remainingChances = WordGame.totalChances;
+            WordGame.hintsUsed = 0;
+            WordGame.gameActive = true;
+            
+            document.getElementById('categoryBadge').textContent = `${GameState.wordThinker}'s Word`;
+            document.getElementById('difficultyBadge').textContent = diff.toUpperCase();
+            document.getElementById('difficultyBadge').className = `difficulty-badge ${diff}`;
+            document.getElementById('hintBtn').style.display = 'inline-block';
+            document.getElementById('keyboardPrompt').innerHTML = `
+                <div style="color:#00ffaa;">⌨️ ${GameState.wordGuesser}, type A-Z to guess!</div>
+                <div style="color:#888;margin-top:5px;">Press 0 for hint | ESC for menu</div>
+            `;
+            document.getElementById('lastKeyPressed').textContent = '';
+            
+            renderWordDisplay();
+            updateWordStats();
+            
+            if (GameState.selectedMode === 'timer') startWordTimer();
+            
+            AudioSystem.startBgMusic();
+            document.body.focus();
+        }
+
+        // ==================== SECRET WORD INPUT ====================
+        function promptForSecretWord() {
+            const modal = document.getElementById('wordInputModal');
+            const input = document.getElementById('secretWordInput');
+            
+            // Create fresh input element
+            const newInput = document.createElement('input');
+            newInput.type = 'text';
+            newInput.id = 'secretWordInput';
+            newInput.maxLength = 20;
+            newInput.placeholder = 'Your secret word';
+            newInput.style.cssText = 'background:#000;border:2px solid #00ffaa;color:#00ffaa;padding:15px 30px;font-size:1.2rem;font-family:Orbitron,monospace;outline:none;text-align:center;text-transform:uppercase;';
+            input.parentNode.replaceChild(newInput, input);
+            
+            modal.style.display = 'flex';
+            setTimeout(() => newInput.focus(), 100);
+            
+            newInput.onkeydown = function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    let word = newInput.value.trim().toUpperCase();
+                    
+                    if (!/^[A-Z]+$/.test(word) || word.length < 3) {
+                        // Show error in the modal
+                        const errorDiv = document.createElement('div');
+                        errorDiv.style.cssText = 'color:#ff4444;margin-top:10px;font-size:0.9rem;';
+                        errorDiv.textContent = 'Enter a valid word (3+ letters, A-Z only)';
+                        errorDiv.id = 'wordError';
+                        
+                        const existing = document.getElementById('wordError');
+                        if (existing) existing.remove();
+                        newInput.parentNode.appendChild(errorDiv);
+                        
+                        setTimeout(() => {
+                            const err = document.getElementById('wordError');
+                            if (err) err.remove();
+                        }, 2000);
+                        return;
+                    }
+                    
+                    modal.style.display = 'none';
+                    newInput.onkeydown = null;
+                    startComputerGuessGame(word);
+                } else if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                    newInput.onkeydown = null;
+                    showMenu('guesserModeMenu');
+                }
+            };
+        }
+
+        // ==================== TOSS ====================
+        function startToss() {
+            hideAllScreens();
+            
+            const tossDiv = document.createElement('div');
+            tossDiv.id = 'tossOverlay';
+            tossDiv.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;';
+            tossDiv.innerHTML = `
+                <div style="font-size:1.5rem;color:#ffaa00;margin-bottom:2rem;">⚔ TOSS OF FATE 🛡</div>
+                <div id="coinAnimation" style="font-size:4rem;margin-bottom:2rem;">●</div>
+                <div id="tossResult" style="font-size:1.2rem;color:#00ffaa;"></div>
+            `;
+            document.body.appendChild(tossDiv);
+            
+            // Play coin flip sound
+            AudioSystem.playCoinFlip();
+            
+            const coinFrames = ['●', '◐', '◓', '○', '◑', '◒'];
+            let frame = 0;
+            const coinInterval = setInterval(() => {
+                document.getElementById('coinAnimation').textContent = coinFrames[frame % coinFrames.length];
+                frame++;
+            }, 100);
+            
+            setTimeout(() => {
+                clearInterval(coinInterval);
+                
+                const starterIndex = Math.random() < 0.5 ? 0 : 1;
+                const starterName = starterIndex === 0 ? GameState.player1Name : GameState.player2Name;
+                TTTGame.currentPlayer = starterIndex === 0 ? 'X' : 'O';
+                
+                AudioSystem.playMenuSelect();
+                
+                document.getElementById('tossResult').innerHTML = `
+                    <div style="margin-bottom:1rem;">🎯 RESULT</div>
+                    <div style="font-size:1.5rem;color:#ffaa00;">${starterName} goes first with ${TTTGame.currentPlayer}!</div>
+                    <div style="margin-top:2rem;color:#666;">Press any key...</div>
+                `;
+                
+                const continueHandler = () => {
+                    document.body.removeChild(tossDiv);
+                    document.removeEventListener('keydown', continueHandler);
+                    startGame();
+                };
+                document.addEventListener('keydown', continueHandler);
+            }, 2000);
+        }
+
+        // ==================== START GAME ====================
+        function startGame() {
+            hideAllScreens();
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('gameStatus').style.display = 'flex';
+            
+            GameState.currentMenu = null;
+            GameState.currentScreen = 'game';
+            
+            document.getElementById('gameAsciiArt').textContent = GameState.selectedGame === 'ttt' ? asciiArt.ttt : asciiArt.word;
+            document.getElementById('player1Name').textContent = GameState.player1Name;
+            document.getElementById('player2Name').textContent = GameState.player2Name;
+            document.getElementById('player1Score').textContent = GameState.player1Score;
+            document.getElementById('player2Score').textContent = GameState.player2Score;
+            document.getElementById('drawCount').textContent = GameState.draws;
+            
+            const modeDisplay = document.getElementById('modeDisplay');
+            const tournamentStatus = document.getElementById('tournamentStatus');
+            
+            if (GameState.tournamentActive) {
+                modeDisplay.innerHTML = `🏆 Tournament R${GameState.tournamentRound}/${GameState.tournamentTotalRounds}`;
+                tournamentStatus.style.display = 'flex';
+                document.getElementById('tournamentRoundDisplay').textContent = `Round ${GameState.tournamentRound}/${GameState.tournamentTotalRounds}`;
+                document.getElementById('tournamentScoreDisplay').textContent = `${GameState.tournamentP1Wins}-${GameState.tournamentP2Wins}`;
+            } else {
+                modeDisplay.innerHTML = GameState.selectedMode === 'timer' ? '⏱ Timer' : '⚡ General';
+                tournamentStatus.style.display = 'none';
+            }
+            
+            if (GameState.selectedGame === 'ttt') {
+                document.getElementById('tttPanel').classList.remove('inactive');
+                document.getElementById('wordPanel').classList.add('inactive');
+                initTTTGame();
+            } else {
+                document.getElementById('wordPanel').classList.remove('inactive');
+                document.getElementById('tttPanel').classList.add('inactive');
+                initWordGame();
+            }
+            
+            AudioSystem.startBgMusic();
+            document.body.focus();
+        }
+
+        // ==================== COMPUTER GUESS GAME ====================
+        function startComputerGuessGame(secretWord) {
+            hideAllScreens();
+            document.getElementById('gameScreen').style.display = 'block';
+            document.getElementById('gameStatus').style.display = 'flex';
+            
+            GameState.currentMenu = null;
+            GameState.currentScreen = 'game';
+            GameState.selectedGame = 'word';
+            
+            document.getElementById('gameAsciiArt').textContent = asciiArt.word;
+            document.getElementById('player1Name').textContent = GameState.player1Name;
+            document.getElementById('player2Name').textContent = 'Computer';
+            
+            document.getElementById('modeDisplay').innerHTML = '🤖 AI Guessing';
+            document.getElementById('tournamentStatus').style.display = 'none';
+            
+            document.getElementById('wordPanel').classList.remove('inactive');
+            document.getElementById('tttPanel').classList.add('inactive');
+            
+            document.getElementById('guesserModeBadge').textContent = '🤖 AI Guesser';
+            
+            WordGame.word = secretWord;
+            WordGame.shown = '_'.repeat(secretWord.length);
+            WordGame.wrongLetters = [];
+            WordGame.correctLetters = [];
+            WordGame.computerGuessedLetters = [];
+            WordGame.computerGuessing = true;
+            WordGame.score = 0;
+            
+            const wordLength = secretWord.length;
+            const diff = GameState.difficulty || 'medium';
+            
+            switch(diff) {
+                case 'easy': WordGame.totalChances = Math.max(10, wordLength + 4); break;
+                case 'medium': WordGame.totalChances = Math.max(7, wordLength + 2); break;
+                case 'hard': WordGame.totalChances = Math.max(5, wordLength); break;
+            }
+            
+            WordGame.remainingChances = WordGame.totalChances;
+            WordGame.hintsMax = 0;
+            WordGame.hintsUsed = 0;
+            WordGame.gameActive = true;
+            
+            document.getElementById('categoryBadge').textContent = 'Your Word';
+            document.getElementById('difficultyBadge').textContent = diff.toUpperCase();
+            document.getElementById('difficultyBadge').className = `difficulty-badge ${diff}`;
+            document.getElementById('hintBtn').style.display = 'none';
+            document.getElementById('keyboardPrompt').innerHTML = `
+                <div style="color:#00ffaa;">🤖 Computer is guessing your word!</div>
+                <div style="color:#888;margin-top:5px;">Watch the AI try...</div>
+            `;
+            
+            renderWordDisplay();
+            updateWordStats();
+            
+            AudioSystem.startBgMusic();
+            setTimeout(computerMakeGuess, 1500);
+            document.body.focus();
+        }
+
+        function computerMakeGuess() {
+            if (!WordGame.gameActive) return;
+            
+            const thinkingEl = document.getElementById('wordAiThinking');
+            thinkingEl.style.display = 'block';
+            
+            setTimeout(() => {
+                thinkingEl.style.display = 'none';
+                
+                let guessLetter = null;
+                for (const letter of WordGame.letterFrequency) {
+                    const upperLetter = letter.toUpperCase();
+                    if (!WordGame.computerGuessedLetters.includes(upperLetter)) {
+                        guessLetter = upperLetter;
+                        break;
+                    }
+                }
+                
+                if (!guessLetter) return;
+                
+                WordGame.computerGuessedLetters.push(guessLetter);
+                
+                if (WordGame.word.includes(guessLetter)) {
+                    AudioSystem.playCorrect();
+                    WordGame.correctLetters.push(guessLetter);
+                    
+                    let newShown = '';
+                    for (let i = 0; i < WordGame.word.length; i++) {
+                        newShown += WordGame.word[i] === guessLetter ? guessLetter : WordGame.shown[i];
+                    }
+                    WordGame.shown = newShown;
+                    
+                    document.getElementById('lastKeyPressed').innerHTML = `<span style="color:#44ff44;">🤖 "${guessLetter}" - CORRECT!</span>`;
+                } else {
+                    AudioSystem.playWrong();
+                    WordGame.wrongLetters.push(guessLetter);
+                    WordGame.remainingChances--;
+                    
+                    document.getElementById('lastKeyPressed').innerHTML = `<span style="color:#ff4444;">🤖 "${guessLetter}" - WRONG!</span>`;
+                }
+                
+                renderWordDisplay();
+                updateWordStats();
+                
+                if (!WordGame.shown.includes('_')) {
+                    WordGame.gameActive = false;
+                    GameState.player2Score++;
+                    document.getElementById('player2Score').textContent = GameState.player2Score;
+                    
+                    // Show revealed word for a moment before victory
+                    setTimeout(() => {
+                        AudioSystem.playGameOver();
+                        showVictory('Computer', 0, false, WordGame.word, true);
+                    }, 1500);
+                    return;
+                }
+                
+                if (WordGame.remainingChances <= 0) {
+                    WordGame.gameActive = false;
+                    GameState.player1Score += 100;
+                    document.getElementById('player1Score').textContent = GameState.player1Score;
+                    updateLeaderboard('word', GameState.player1Name, 100);
+                    
+                    setTimeout(() => {
+                        AudioSystem.playVictory();
+                        showVictory(GameState.player1Name, 100, false, WordGame.word, true);
+                    }, 1500);
+                    return;
+                }
+                
+                setTimeout(computerMakeGuess, 2000);
+            }, 1500);
+        }
+
+        // ==================== TTT GAME ====================
+        function initTTTGame() {
+            TTTGame.board = ['', '', '', '', '', '', '', '', ''];
+            TTTGame.cursorPos = 4;
+            TTTGame.gameActive = true;
+            TTTGame.winningCells = [];
+            
+            const badge = document.getElementById('tttTournamentBadge');
+            if (GameState.tournamentActive) {
+                badge.style.display = 'inline-block';
+                badge.textContent = `Round ${GameState.tournamentRound}/${GameState.tournamentTotalRounds}`;
+            } else {
+                badge.style.display = 'none';
+            }
+            
+            renderTTTBoard();
+            updateTTTInfo();
+            
+            if (GameState.selectedMode === 'timer') startTTTTimer();
+            
+            // Check if AI should move first
+            if (GameState.playerMode === 'ai' && TTTGame.currentPlayer === 'O') {
+                setTimeout(makeAIMove, 1000);
+            }
+        }
+
+        function renderTTTBoard() {
+            const board = document.getElementById('tttBoard');
+            const style = TTTGame.styles[GameState.style || 'classic'];
+            
+            board.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'ttt-cell';
+                cell.dataset.index = i;
+                
+                if (TTTGame.board[i]) {
+                    cell.classList.add('taken', TTTGame.board[i].toLowerCase());
+                    cell.textContent = style[TTTGame.board[i]];
+                } else {
+                    cell.innerHTML = `<span class="cell-number">${i + 1}</span>`;
+                }
+                
+                if (i === TTTGame.cursorPos && TTTGame.gameActive) cell.classList.add('selected');
+                if (TTTGame.winningCells.includes(i)) cell.classList.add('winner');
+                
+                cell.addEventListener('click', () => handleTTTClick(i));
+                board.appendChild(cell);
+            }
+        }
+
+        function updateTTTInfo() {
+            const currentName = TTTGame.currentPlayer === 'X' ? GameState.player1Name : GameState.player2Name;
+            const isAI = GameState.playerMode === 'ai' && TTTGame.currentPlayer === 'O';
+            
+            document.getElementById('tttInfo').innerHTML = `
+                <div>Turn: <span style="color:${TTTGame.currentPlayer === 'X' ? '#ff4444' : '#44ff44'};">${currentName} (${TTTGame.currentPlayer})</span></div>
+                ${isAI ? '<div style="color:#888;">AI thinking...</div>' : '<div style="color:#888;">Arrows/1-9 + Enter</div>'}
+            `;
+            
+            document.getElementById('currentTurn').textContent = `${currentName}'s Turn (${TTTGame.currentPlayer})`;
+        }
+
+        function handleTTTClick(index) {
+            if (!TTTGame.gameActive || TTTGame.board[index]) return;
+            
+            // For 2 player mode, both can click
+            // For AI mode, only when it's player's turn
+            if (GameState.playerMode === 'ai' && TTTGame.currentPlayer === 'O') return;
+            
+            makeMove(index);
+        }
+
+        function handleTTTKeyboard(key) {
+            if (!TTTGame.gameActive) return;
+            if (GameState.playerMode === 'ai' && TTTGame.currentPlayer === 'O') return;
+            
+            AudioSystem.playKeyPress();
+            
+            if (key >= '1' && key <= '9') {
+                const index = parseInt(key) - 1;
+                if (!TTTGame.board[index]) {
+                    TTTGame.cursorPos = index;
+                    makeMove(index);
+                }
+                return;
+            }
+            
+            const row = Math.floor(TTTGame.cursorPos / 3);
+            const col = TTTGame.cursorPos % 3;
+            
+            switch (key) {
+                case 'ArrowUp': if (row > 0) TTTGame.cursorPos -= 3; break;
+                case 'ArrowDown': if (row < 2) TTTGame.cursorPos += 3; break;
+                case 'ArrowLeft': if (col > 0) TTTGame.cursorPos--; break;
+                case 'ArrowRight': if (col < 2) TTTGame.cursorPos++; break;
+                case 'Enter':
+                case ' ':
+                    if (!TTTGame.board[TTTGame.cursorPos]) makeMove(TTTGame.cursorPos);
+                    break;
+            }
+            
+            renderTTTBoard();
+        }
+
+        function makeMove(index) {
+            TTTGame.board[index] = TTTGame.currentPlayer;
+            AudioSystem.playMenuSelect();
+            renderTTTBoard();
+            
+            const winner = checkTTTWinner();
+            if (winner) {
+                TTTGame.gameActive = false;
+                handleTTTWin(winner);
+                return;
+            }
+            
+            if (TTTGame.board.every(cell => cell)) {
+                TTTGame.gameActive = false;
+                handleTTTDraw();
+                return;
+            }
+            
+            TTTGame.currentPlayer = TTTGame.currentPlayer === 'X' ? 'O' : 'X';
+            updateTTTInfo();
+            
+            if (GameState.playerMode === 'ai' && TTTGame.currentPlayer === 'O' && TTTGame.gameActive) {
+                setTimeout(makeAIMove, 500);
+            }
+        }
+
+        function makeAIMove() {
+            if (!TTTGame.gameActive) return;
+            
+            document.getElementById('tttAiThinking').style.display = 'block';
+            
+            let animSteps = 0;
+            const animInterval = setInterval(() => {
+                const emptyCells = TTTGame.board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+                if (emptyCells.length > 0) {
+                    TTTGame.cursorPos = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                    renderTTTBoard();
+                }
+                animSteps++;
+                
+                if (animSteps > 8) {
+                    clearInterval(animInterval);
+                    const move = findBestMove();
+                    TTTGame.cursorPos = move;
+                    document.getElementById('tttAiThinking').style.display = 'none';
+                    makeMove(move);
+                }
+            }, 150);
+        }
+
+        function findBestMove() {
+            const emptyCells = TTTGame.board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+            
+            if (GameState.difficulty === 'easy') {
+                return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+            }
+            
+            // Win check
+            for (const i of emptyCells) {
+                TTTGame.board[i] = 'O';
+                if (checkTTTWinner() === 'O') { TTTGame.board[i] = ''; return i; }
+                TTTGame.board[i] = '';
+            }
+            
+            // Block check
+            for (const i of emptyCells) {
+                TTTGame.board[i] = 'X';
+                if (checkTTTWinner() === 'X') { TTTGame.board[i] = ''; return i; }
+                TTTGame.board[i] = '';
+            }
+            
+            if (emptyCells.includes(4)) return 4;
+            
+            if (GameState.difficulty === 'hard') {
+                const corners = [0, 2, 6, 8].filter(c => emptyCells.includes(c));
+                if (corners.length > 0) return corners[Math.floor(Math.random() * corners.length)];
+            }
+            
+            return emptyCells[Math.floor(Math.random() * emptyCells.length)];
+        }
+
+        function checkTTTWinner() {
+            const lines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
+            
+            for (const [a, b, c] of lines) {
+                if (TTTGame.board[a] && TTTGame.board[a] === TTTGame.board[b] && TTTGame.board[a] === TTTGame.board[c]) {
+                    TTTGame.winningCells = [a, b, c];
+                    return TTTGame.board[a];
+                }
+            }
+            return null;
+        }
+
+        function handleTTTWin(winner) {
+            renderTTTBoard();
+            AudioSystem.playVictory();
+            
+            const winnerName = winner === 'X' ? GameState.player1Name : GameState.player2Name;
+            
+            if (winner === 'X') {
+                GameState.player1Score += 100;
+                if (GameState.tournamentActive) GameState.tournamentP1Wins++;
+            } else {
+                GameState.player2Score += 100;
+                if (GameState.tournamentActive) GameState.tournamentP2Wins++;
+            }
+            
+            GameState.sessionStats.gamesPlayed++;
+            if (winner === 'X') GameState.sessionStats.gamesWon++;
+            
+            updateLeaderboard('ttt', winnerName, 100);
+            
+            document.getElementById('player1Score').textContent = GameState.player1Score;
+            document.getElementById('player2Score').textContent = GameState.player2Score;
+            
+            showVictory(winnerName, 100);
+        }
+
+        function handleTTTDraw() {
+            GameState.draws++;
+            GameState.sessionStats.gamesPlayed++;
+            document.getElementById('drawCount').textContent = GameState.draws;
+            showVictory('No one', 0, true);
+        }
+
+        function startTTTTimer() {
+            const timerEl = document.getElementById('tttTimer');
+            timerEl.style.display = 'block';
+            let timeLeft = GameState.selectedTime;
+            
+            const timerInterval = setInterval(() => {
+                if (!TTTGame.gameActive) { clearInterval(timerInterval); return; }
+                
+                timeLeft--;
+                timerEl.textContent = `⏱ ${timeLeft}s`;
+                timerEl.classList.toggle('warning', timeLeft < 10);
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    TTTGame.gameActive = false;
+                    const loser = TTTGame.currentPlayer;
+                    const winner = loser === 'X' ? 'O' : 'X';
+                    handleTTTWin(winner);
+                }
+            }, 1000);
+        }
+
+        // ==================== WORD GAME ====================
+        function initWordGame() {
+            const diff = GameState.difficulty || 'easy';
+            let cat = GameState.category;
+            
+            if (cat === 'random') {
+                const catKeys = Object.keys(categories[diff]);
+                cat = catKeys[Math.floor(Math.random() * catKeys.length)];
+            }
+            
+            const wordList = categories[diff][cat];
+            WordGame.word = wordList[Math.floor(Math.random() * wordList.length)].toUpperCase();
+            WordGame.shown = '_'.repeat(WordGame.word.length);
+            WordGame.wrongLetters = [];
+            WordGame.correctLetters = [];
+            WordGame.score = 0;
+            WordGame.computerGuessing = false;
+            WordGame.currentPlayerIndex = 0;
+            
+            const wordLength = WordGame.word.length;
+            
+            switch(diff) {
+                case 'easy':
+                    WordGame.totalChances = Math.max(10, wordLength + 4);
+                    WordGame.hintsMax = 3;
+                    break;
+                case 'medium':
+                    WordGame.totalChances = Math.max(7, wordLength + 2);
+                    WordGame.hintsMax = 2;
+                    break;
+                case 'hard':
+                    WordGame.totalChances = Math.max(5, wordLength);
+                    WordGame.hintsMax = 1;
+                    break;
+            }
+            
+            WordGame.remainingChances = WordGame.totalChances;
+            WordGame.hintsUsed = 0;
+            WordGame.gameActive = true;
+            
+            document.getElementById('guesserModeBadge').textContent = '🧠 Human Guesser';
+            document.getElementById('lastKeyPressed').textContent = '';
+            document.getElementById('categoryBadge').textContent = cat.charAt(0).toUpperCase() + cat.slice(1);
+            document.getElementById('difficultyBadge').textContent = diff.toUpperCase();
+            document.getElementById('difficultyBadge').className = `difficulty-badge ${diff}`;
+            document.getElementById('hintBtn').style.display = 'inline-block';
+            
+            const is2Player = GameState.playerMode === '2player';
+            document.getElementById('keyboardPrompt').innerHTML = `
+                <div style="color:#00ffaa;">⌨️ ${is2Player ? GameState.player1Name + ', type' : 'Type'} A-Z to guess</div>
+                <div style="color:#888;margin-top:5px;">Press 0 for hint | ESC for menu</div>
+            `;
+            
+            showWordAIThinking(() => {
+                renderWordDisplay();
+                updateWordStats();
+                if (GameState.selectedMode === 'timer') startWordTimer();
+            });
+        }
+
+        function showWordAIThinking(callback) {
+            const thinkingEl = document.getElementById('wordAiThinking');
+            thinkingEl.style.display = 'block';
+            
+            let dots = 0;
+            const dotsInterval = setInterval(() => {
+                dots = (dots + 1) % 4;
+                document.getElementById('wordThinkingDots').textContent = '.'.repeat(dots);
+            }, 300);
+            
+            setTimeout(() => {
+                clearInterval(dotsInterval);
+                thinkingEl.style.display = 'none';
+                callback();
+            }, 2000);
+        }
+
+        function renderWordDisplay() {
+            const display = document.getElementById('wordDisplay');
+            display.innerHTML = '';
+            
+            for (let i = 0; i < WordGame.word.length; i++) {
+                const box = document.createElement('div');
+                box.className = 'letter-box';
+                
+                if (WordGame.shown[i] !== '_') {
+                    box.classList.add('revealed');
+                    box.textContent = WordGame.shown[i];
+                } else {
+                    box.textContent = '_';
+                }
+                
+                display.appendChild(box);
+            }
+        }
+
+        function updateWordStats() {
+            document.getElementById('wordLength').textContent = `${WordGame.word.length} letters`;
+            document.getElementById('totalChances').textContent = WordGame.totalChances;
+            
+            const remaining = document.getElementById('remainingChances');
+            remaining.textContent = WordGame.remainingChances;
+            remaining.style.color = WordGame.remainingChances <= 2 ? '#ff4444' : WordGame.remainingChances <= 4 ? '#ffaa00' : '#44ff44';
+            
+            document.getElementById('hintsLeft').textContent = `${WordGame.hintsMax - WordGame.hintsUsed}/${WordGame.hintsMax}`;
+            document.getElementById('currentScore').textContent = WordGame.score;
+            
+            const revealedCount = WordGame.shown.replace(/_/g, '').length;
+            const progress = Math.round((revealedCount / WordGame.word.length) * 100);
+            const progressEl = document.getElementById('guessProgress');
+            progressEl.textContent = `${progress}%`;
+            progressEl.style.color = progress >= 75 ? '#44ff44' : progress >= 50 ? '#ffaa00' : '#ff4444';
+            
+            document.getElementById('wrongLetters').textContent = WordGame.wrongLetters.join(', ') || '-';
+            document.getElementById('correctLetters').textContent = WordGame.correctLetters.join(', ') || '-';
+            document.getElementById('hintBtn').disabled = WordGame.hintsUsed >= WordGame.hintsMax;
+            
+            document.getElementById('currentTurn').textContent = `Word: ${WordGame.word.length} letters | ${WordGame.word.length - revealedCount} left | ${WordGame.remainingChances} chances`;
+        }
+
+        function handleWordKeyboard(key) {
+            if (!WordGame.gameActive || WordGame.computerGuessing) return;
+            
+            if (key === '0') {
+                document.getElementById('lastKeyPressed').textContent = '💡 Hint!';
+                useHint();
+                return;
+            }
+            
+            if (/^[a-zA-Z]$/.test(key)) {
+                const letter = key.toUpperCase();
+                
+                AudioSystem.playKeyPress();
+                
+                const lastKeyEl = document.getElementById('lastKeyPressed');
+                if (WordGame.wrongLetters.includes(letter) || WordGame.correctLetters.includes(letter)) {
+                    lastKeyEl.innerHTML = `<span style="color:#888;">"${letter}" already guessed!</span>`;
+                } else if (WordGame.word.includes(letter)) {
+                    lastKeyEl.innerHTML = `<span style="color:#44ff44;">✓ "${letter}" is correct!</span>`;
+                } else {
+                    lastKeyEl.innerHTML = `<span style="color:#ff4444;">✗ "${letter}" is wrong!</span>`;
+                }
+                
+                guessLetter(letter);
+            }
+        }
+
+        function guessLetter(letter) {
+            if (WordGame.wrongLetters.includes(letter) || WordGame.correctLetters.includes(letter)) return;
+            
+            if (WordGame.word.includes(letter)) {
+                AudioSystem.playCorrect();
+                WordGame.correctLetters.push(letter);
+                
+                let newShown = '';
+                for (let i = 0; i < WordGame.word.length; i++) {
+                    newShown += WordGame.word[i] === letter ? letter : WordGame.shown[i];
+                }
+                WordGame.shown = newShown;
+                
+                WordGame.score += 10 * WordGame.word.split(letter).length - 1;
+            } else {
+                AudioSystem.playWrong();
+                WordGame.wrongLetters.push(letter);
+                WordGame.remainingChances--;
+                GameState.sessionStats.mistakes++;
+            }
+            
+            renderWordDisplay();
+            updateWordStats();
+            checkWordGameEnd();
+        }
+
+        function useHint() {
+            if (WordGame.hintsUsed >= WordGame.hintsMax || WordGame.remainingChances <= 1) return;
+            
+            AudioSystem.playHint();
+            
+            const unrevealed = [];
+            for (let i = 0; i < WordGame.word.length; i++) {
+                if (WordGame.shown[i] === '_') unrevealed.push(i);
+            }
+            
+            if (unrevealed.length === 0) return;
+            
+            const idx = unrevealed[Math.floor(Math.random() * unrevealed.length)];
+            const letter = WordGame.word[idx];
+            
+            let newShown = '';
+            for (let i = 0; i < WordGame.word.length; i++) {
+                newShown += WordGame.word[i] === letter ? letter : WordGame.shown[i];
+            }
+            WordGame.shown = newShown;
+            
+            if (!WordGame.correctLetters.includes(letter)) WordGame.correctLetters.push(letter);
+            
+            WordGame.hintsUsed++;
+            WordGame.remainingChances--;
+            WordGame.score -= 15;
+            GameState.sessionStats.hintsUsed++;
+            
+            renderWordDisplay();
+            updateWordStats();
+            checkWordGameEnd();
+        }
+
+        function checkWordGameEnd() {
+            if (!WordGame.shown.includes('_')) {
+                WordGame.gameActive = false;
+                
+                // Show revealed word for a moment
+                WordGame.shown = WordGame.word;
+                renderWordDisplay();
+                
+                setTimeout(() => {
+                    AudioSystem.playVictory();
+                    
+                    WordGame.score += WordGame.remainingChances * 20;
+                    if (WordGame.wrongLetters.length === 0) {
+                        WordGame.score += 100;
+                        GameState.sessionStats.perfectGames++;
+                    }
+                    
+                    const multipliers = { easy: 1, medium: 1.2, hard: 1.5 };
+                    WordGame.score = Math.floor(WordGame.score * (multipliers[GameState.difficulty] || 1));
+                    
+                    GameState.sessionStats.gamesPlayed++;
+                    GameState.sessionStats.gamesWon++;
+                    
+                    // Determine winner based on mode
+                    let winnerName;
+                    if (GameState.playerMode === '2player') {
+                        winnerName = GameState.wordGuesser;
+                        if (GameState.wordGuesser === GameState.player1Name) {
+                            GameState.player1Score += WordGame.score;
+                        } else {
+                            GameState.player2Score += WordGame.score;
+                        }
+                    } else {
+                        winnerName = GameState.player1Name;
+                        GameState.player1Score += WordGame.score;
+                    }
+                    
+                    if (GameState.tournamentActive) {
+                        if (winnerName === GameState.player1Name) GameState.tournamentP1Wins++;
+                        else GameState.tournamentP2Wins++;
+                    }
+                    
+                    updateLeaderboard('word', winnerName, WordGame.score);
+                    document.getElementById('player1Score').textContent = GameState.player1Score;
+                    document.getElementById('player2Score').textContent = GameState.player2Score;
+                    
+                    showVictory(winnerName, WordGame.score, false, WordGame.word);
+                }, 1500);
+                return;
+            }
+            
+            if (WordGame.remainingChances <= 0) {
+                WordGame.gameActive = false;
+                
+                // Show the word before game over
+                WordGame.shown = WordGame.word;
+                renderWordDisplay();
+                
+                setTimeout(() => {
+                    AudioSystem.playGameOver();
+                    
+                    GameState.sessionStats.gamesPlayed++;
+                    
+                    // Determine loser/winner based on mode
+                    let winnerName;
+                    if (GameState.playerMode === '2player') {
+                        // Word thinker wins if guesser fails
+                        winnerName = GameState.wordThinker;
+                        if (GameState.wordThinker === GameState.player1Name) {
+                            GameState.player1Score += 50;
+                        } else {
+                            GameState.player2Score += 50;
+                        }
+                    } else {
+                        winnerName = 'Computer';
+                        GameState.player2Score++;
+                    }
+                    
+                    if (GameState.tournamentActive) {
+                        if (winnerName === GameState.player1Name) GameState.tournamentP1Wins++;
+                        else GameState.tournamentP2Wins++;
+                    }
+                    
+                    document.getElementById('player1Score').textContent = GameState.player1Score;
+                    document.getElementById('player2Score').textContent = GameState.player2Score;
+                    
+                    showVictory(winnerName, GameState.playerMode === '2player' ? 50 : 0, false, WordGame.word);
+                }, 1500);
+            }
+        }
+
+        function startWordTimer() {
+            const timerContainer = document.getElementById('timerBarContainer');
+            const timerBar = document.getElementById('timerBar');
+            const timerDisplay = document.getElementById('wordTimer');
+            
+            timerContainer.style.display = 'block';
+            timerDisplay.style.display = 'block';
+            
+            WordGame.timeRemaining = GameState.selectedTime;
+            
+            WordGame.timerInterval = setInterval(() => {
+                if (!WordGame.gameActive) { clearInterval(WordGame.timerInterval); return; }
+                
+                WordGame.timeRemaining--;
+                const percent = (WordGame.timeRemaining / GameState.selectedTime) * 100;
+                timerBar.style.width = percent + '%';
+                timerDisplay.textContent = `⏱ ${WordGame.timeRemaining}s`;
+                timerDisplay.classList.toggle('warning', WordGame.timeRemaining < 10);
+                
+                if (WordGame.timeRemaining <= 0) {
+                    clearInterval(WordGame.timerInterval);
+                    WordGame.remainingChances = 0;
+                    checkWordGameEnd();
+                }
+            }, 1000);
+        }
+
+        // ==================== VICTORY SCREEN ====================
+        function showVictory(winner, score, isDraw = false, revealedWord = null, isComputerGuessMode = false) {
+            if (WordGame.timerInterval) clearInterval(WordGame.timerInterval);
+            AudioSystem.stopBgMusic();
+            
+            const overlay = document.getElementById('victoryOverlay');
+            const title = document.getElementById('victoryTitle');
+            const details = document.getElementById('victoryDetails');
+            const scoreEl = document.getElementById('victoryScore');
+            const wordDisplay = document.getElementById('revealedWordDisplay');
+            const tournamentInfo = document.getElementById('tournamentInfo');
+            
+            // Show revealed word
+            if (revealedWord) {
+                wordDisplay.textContent = revealedWord;
+                wordDisplay.style.display = 'block';
+            } else {
+                wordDisplay.style.display = 'none';
+            }
+            
+            if (isDraw) {
+                title.textContent = '⚖ DRAW! ⚖';
+                details.textContent = 'No winner this time!';
+                scoreEl.textContent = '';
+            } else if (isComputerGuessMode) {
+                if (winner === GameState.player1Name) {
+                    title.textContent = '🎉 YOU WIN! 🎉';
+                    details.textContent = `Computer couldn't guess your word!`;
+                    scoreEl.textContent = `Score: +${score}`;
+                } else {
+                    title.textContent = '🤖 COMPUTER WINS! 🤖';
+                    details.textContent = `Computer guessed your word!`;
+                    scoreEl.textContent = 'Better luck next time!';
+                }
+            } else if (revealedWord && winner !== GameState.player1Name) {
+                title.textContent = '💀 GAME OVER 💀';
+                details.innerHTML = `The word was:`;
+                scoreEl.textContent = 'Better luck next time!';
+            } else {
+                title.textContent = '🎉 VICTORY! 🎉';
+                details.textContent = `${winner} wins the game!`;
+                scoreEl.textContent = score > 0 ? `Score: +${score}` : '';
+            }
+            
+            // Tournament info
+            if (GameState.tournamentActive) {
+                const scoreText = `${GameState.player1Name}: ${GameState.tournamentP1Wins} - ${GameState.player2Name}: ${GameState.tournamentP2Wins}`;
+                
+                const winsNeeded = Math.ceil(GameState.tournamentTotalRounds / 2);
+                if (GameState.tournamentP1Wins >= winsNeeded || GameState.tournamentP2Wins >= winsNeeded) {
+                    const tournamentWinner = GameState.tournamentP1Wins >= winsNeeded ? GameState.player1Name : GameState.player2Name;
+                    tournamentInfo.innerHTML = `
+                        <div style="color:#ffaa00;font-size:1.5rem;">🏆 TOURNAMENT COMPLETE! 🏆</div>
+                        <div style="margin-top:10px;">Winner: ${tournamentWinner}</div>
+                        <div>Final Score: ${scoreText}</div>
+                    `;
+                    GameState.tournamentActive = false;
+                } else {
+                    tournamentInfo.innerHTML = `
+                        <div style="color:#ffaa00;">🏆 TOURNAMENT MODE 🏆</div>
+                        <div>Round ${GameState.tournamentRound}/${GameState.tournamentTotalRounds} Complete</div>
+                        <div>${scoreText}</div>
+                    `;
+                }
+                tournamentInfo.style.display = 'block';
+            } else {
+                tournamentInfo.style.display = 'none';
+            }
+            
+            document.getElementById('playAgainBtn').textContent = GameState.tournamentActive ? '➡ Next Round' : '🔄 Play Again';
+            
+            overlay.style.display = 'flex';
+        }
+
+        // ==================== LEADERBOARD ====================
+        function updateLeaderboard(type, name, score) {
+            const lb = type === 'ttt' ? tttLeaderboard : wordLeaderboard;
+            const existing = lb.find(e => e.name.toLowerCase() === name.toLowerCase());
+            
+            if (existing) {
+                existing.wins++;
+                existing.score += score;
+            } else {
+                lb.push({ name, wins: 1, score, date: new Date().toLocaleDateString() });
+            }
+            
+            localStorage.setItem(type === 'ttt' ? 'tttLeaderboard' : 'wordLeaderboard', JSON.stringify(lb));
+        }
+
+        // ==================== EVENT LISTENERS ====================
+        document.addEventListener('keydown', (e) => {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                e.preventDefault();
+            }
+            
+            if (e.key === 'F1') {
+                e.preventDefault();
+                document.getElementById('helpOverlay').style.display = 'flex';
+                return;
+            }
+            
+            if (document.getElementById('helpOverlay').style.display === 'flex') {
+                document.getElementById('helpOverlay').style.display = 'none';
+                return;
+            }
+            
+            if (document.getElementById('inputModal').style.display === 'flex') return;
+            if (document.getElementById('wordInputModal').style.display === 'flex') return;
+            if (document.getElementById('victoryOverlay').style.display === 'flex') return;
+            
+            if (GameState.currentScreen === 'start') {
+                if (e.key === 'Enter') {
+                    AudioSystem.init();
+                    AudioSystem.startBgMusic();
+                    showMenu('mainMenu');
+                }
+                return;
+            }
+            
+            if (GameState.currentMenu) {
+                handleMenuNavigation(e.key);
+                return;
+            }
+            
+            if (GameState.currentScreen === 'game') {
+                if (e.ctrlKey && (e.key === 'k' || e.key === 'K')) {
+                    TTTGame.gameActive = false;
+                    WordGame.gameActive = false;
+                    if (WordGame.timerInterval) clearInterval(WordGame.timerInterval);
+                    AudioSystem.stopBgMusic();
+                    showMenu('mainMenu');
+                    return;
+                }
+                
+                if (e.key === 'Escape') {
+                    TTTGame.gameActive = false;
+                    WordGame.gameActive = false;
+                    if (WordGame.timerInterval) clearInterval(WordGame.timerInterval);
+                    AudioSystem.stopBgMusic();
+                    showMenu('mainMenu');
+                    return;
+                }
+                
+                if (GameState.selectedGame === 'ttt') {
+                    handleTTTKeyboard(e.key);
+                } else if (GameState.selectedGame === 'word' && !WordGame.computerGuessing) {
+                    handleWordKeyboard(e.key);
+                }
+            }
+        });
+
+        document.getElementById('startBtn').addEventListener('click', () => {
+            AudioSystem.init();
+            AudioSystem.startBgMusic();
+            showMenu('mainMenu');
+        });
+
+        document.getElementById('playAgainBtn').addEventListener('click', () => {
+            document.getElementById('victoryOverlay').style.display = 'none';
+            
+            if (GameState.tournamentActive) {
+                GameState.tournamentRound++;
+                if (GameState.selectedGame === 'ttt') {
+                    startToss();
+                } else if (GameState.playerMode === '2player') {
+                    // 2 player word game - do toss again
+                    startWordGuessToss();
+                } else {
+                    startGame();
+                }
+            } else if (GameState.playerMode === '2player' && GameState.selectedGame === 'word') {
+                // 2 player word game - do toss again
+                startWordGuessToss();
+            } else if (GameState.guesserMode === 'computer' && GameState.selectedGame === 'word') {
+                promptForSecretWord();
+            } else if (GameState.selectedGame === 'ttt') {
+                startToss();
+            } else {
+                startGame();
+            }
+        });
+
+        document.getElementById('changeSettingsBtn').addEventListener('click', () => {
+            document.getElementById('victoryOverlay').style.display = 'none';
+            GameState.tournamentActive = false;
+            // Go back to mode selection for a fresh start
+            showMenu('modeSelectMenu');
+        });
+
+        document.getElementById('mainMenuBtn').addEventListener('click', () => {
+            document.getElementById('victoryOverlay').style.display = 'none';
+            GameState.tournamentActive = false;
+            showMenu('mainMenu');
+        });
+
+        document.getElementById('hintBtn').addEventListener('click', useHint);
+
+        document.getElementById('musicBtn').addEventListener('click', () => {
+            const isOn = AudioSystem.toggleMusic();
+            document.getElementById('musicBtn').textContent = `🎵 Music: ${isOn ? 'ON' : 'OFF'}`;
+            document.getElementById('musicBtn').classList.toggle('muted', !isOn);
+        });
+
+        document.getElementById('sfxBtn').addEventListener('click', () => {
+            const isOn = AudioSystem.toggleSfx();
+            document.getElementById('sfxBtn').textContent = `🔊 SFX: ${isOn ? 'ON' : 'OFF'}`;
+            document.getElementById('sfxBtn').classList.toggle('muted', !isOn);
+        });
+
+        document.querySelectorAll('.menu-items').forEach(menu => {
+            menu.addEventListener('mouseover', (e) => {
+                const item = e.target.closest('.menu-item');
+                if (item && item.dataset.index !== undefined) {
+                    GameState.selectedIndex = parseInt(item.dataset.index);
+                    updateMenuSelection(GameState.currentMenu);
+                }
+            });
+            
+            menu.addEventListener('click', (e) => {
+                const item = e.target.closest('.menu-item');
+                if (item) {
+                    AudioSystem.playMenuSelect();
+                    handleMenuSelect();
+                }
+            });
+        });
+
+        window.onload = runLoadingScreen;
+    </script>
+</body>
+</html>
