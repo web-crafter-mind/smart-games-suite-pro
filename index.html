@@ -688,7 +688,7 @@
             <div class="menu-title">🎮 SELECT GAME 🎮</div>
             <div class="menu-items" id="gameSelectItems">
                 <div class="menu-item" data-index="0"><span class="arrow">▶</span> ⚔ Tic-Tac-Toe</div>
-                <div class="menu-item" data-index="1"><span class="arrow">▶</span> 💡 Word Guess</div>
+                <div class="menu-item" data-index="1"><span class="arrow">▶</span> ��� Word Guess</div>
                 <div class="menu-item" data-index="2"><span class="arrow">▶</span> ↩ Back</div>
             </div>
             <div class="menu-hint">Use ↑↓ Arrow Keys | Enter to Select</div>
@@ -938,7 +938,7 @@
     <!-- Help Overlay -->
     <div class="victory-overlay" id="helpOverlay" style="display: none;">
         <div style="background: rgba(0,0,0,0.95); border: 3px solid #00ffaa; border-radius: 10px; padding: 30px; max-width: 600px;">
-            <div style="font-size: 1.5rem; color: #ffaa00; margin-bottom: 20px; text-align: center;">★ HELP & CONTROLS ★</div>
+            <div style="font-size: 1.5rem; color: #ffaa00; margin-bottom: 20px; text-align: center;">��� HELP & CONTROLS ★</div>
             <div style="line-height: 2; font-size: 0.9rem;">
                 <div style="color: #00ffaa; font-weight: bold;">═══ TIC-TAC-TOE ═══</div>
                 <div>Arrow Keys / Numbers 1-9 - Select cell</div>
@@ -956,85 +956,66 @@
     </div>
 
     <script>
-        // ==================== NAME INPUT HANDLER ====================
-        // Store reference to the name input handler to prevent duplicate listeners
+        // ==================== PLAYER NAME MANAGER ====================
+        // Global storage for player name to prevent repeated prompts
+        let playerNameStored = localStorage.getItem('sgsp_playerName');
         let nameInputHandler = null;
+        
+        function getStoredPlayerName() {
+            return localStorage.getItem('sgsp_playerName');
+        }
+        
+        function savePlayerName(name) {
+            localStorage.setItem('sgsp_playerName', name);
+            playerNameStored = name;
+        }
+        
+        function showNameInputModalOnce() {
+            // Check if name already exists
+            const existingName = getStoredPlayerName();
+            if (existingName) {
+                console.log('Using stored name:', existingName);
+                return existingName;
+            }
 
-        function setupNameInputHandler() {
+            const modal = document.getElementById('inputModal');
             const nameInput = document.getElementById('nameInput');
             
-            // Remove previous handler if it exists
+            // Remove old listener
             if (nameInputHandler) {
                 nameInput.removeEventListener('keypress', nameInputHandler);
             }
 
-            // Define handler with proper event cleanup
+            // Clear input
+            nameInput.value = '';
+            
+            // Setup new handler
             nameInputHandler = function(e) {
                 if (e.key === 'Enter') {
                     e.preventDefault();
-                    const playerName = nameInput.value.trim() || 'Player';
-                    // Store player name in session
-                    sessionStorage.setItem('playerName', playerName);
-                    // Hide modal
-                    document.getElementById('inputModal').style.display = 'none';
-                    // Proceed with game
-                    proceedAfterNameInput(playerName);
+                    const name = nameInput.value.trim() || 'Player';
+                    savePlayerName(name);
+                    modal.style.display = 'none';
+                    console.log('Name saved:', name);
                 }
             };
 
-            // Add the handler
             nameInput.addEventListener('keypress', nameInputHandler);
-        }
-
-        function showNameInputModal() {
-            const modal = document.getElementById('inputModal');
-            const nameInput = document.getElementById('nameInput');
-            
-            // Clear previous input
-            nameInput.value = '';
             
             // Show modal
             modal.style.display = 'flex';
-            
-            // Setup the handler
-            setupNameInputHandler();
-            
-            // Focus on input
             nameInput.focus();
+            
+            return null;
         }
 
-        function proceedAfterNameInput(playerName) {
-            // Your game logic here
-            console.log('Player name set to:', playerName);
-        }
-
-        // ==================== AUDIO SYSTEM - SOFT MELODIC MUSIC ====================
-        const AudioSystem = {
-            musicEnabled: true,
-            sfxEnabled: true,
-            audioContext: null,
-            bgMusicInterval: null,
-            melodyIndex: 0,
-            masterGain: null,
-            currentNotes: [],
-            
-            init() {
-                try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    this.masterGain = this.audioContext.createGain();
-                    this.masterGain.gain.value = 0.25;
-                    this.masterGain.connect(this.audioContext.destination);
-                } catch (e) {
-                    console.log('Audio not supported');
-                }
-            },
-            
-            resume() {
-                if (this.audioContext && this.audioContext.state === 'suspended') {
-                    this.audioContext.resume();
-                }
+        // Initialize player name on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load stored name or show prompt once
+            if (!playerNameStored) {
+                showNameInputModalOnce();
             }
-        };
+        });
     </script>
 </body>
 </html>
