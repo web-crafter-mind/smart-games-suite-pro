@@ -1,0 +1,17 @@
+{
+  "name": "smart-games-suite-pro",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Offline-first responsive game suite prepared for Android Play Store wrapping.",
+  "scripts": {
+    "serve": "node scripts/serve.cjs",
+    "validate": "node scripts/validate.cjs"
+  },
+  "keywords": [
+    "games",
+    "pwa",
+    "android",
+    "play-store"
+  ],
+  "license": "MIT"
+}
