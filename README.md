@@ -1,5 +1,6 @@
 # Smart Games Suite Pro
 
+<<<<<<< HEAD
 Responsive offline-first game suite with Tic-Tac-Toe and Word Guess modes, stronger hard-mode AI, daily challenges, achievements, XP/streak tracking, two-player play, timer mode, tournament mode, audio controls, session stats, and local leaderboards.
 
 ## Current Workspace Status
@@ -43,3 +44,31 @@ npm run validate
 Google Play does not upload this web folder directly. Package it as an Android App Bundle using Trusted Web Activity/Bubblewrap or Capacitor, then upload the `.aab` in Play Console.
 
 Before publishing, make sure the developer contact in your Play Console account is real and visible on the public store listing.
+=======
+A single-file browser game suite with Tic-Tac-Toe and Word Guess modes, including AI play, two-player play, timer mode, tournament mode, audio controls, session stats, and leaderboards.
+
+## Play
+
+Open `index.html` in a browser, or deploy the folder to any static hosting service.
+
+Good free hosting options:
+
+- GitHub Pages
+- Netlify
+- Vercel
+
+## Publish Checklist
+
+- Test the game in Chrome, Edge, and one mobile browser.
+- Use `Ctrl + F5` after uploading if the browser shows an old cached version.
+- Keep `index.html`, `favicon.svg`, and this `README.md` together in the same folder.
+
+## Controls
+
+- Menus: arrow keys, Enter, mouse, or touch
+- Tic-Tac-Toe: click cells, number keys 1-9, or arrow keys plus Enter
+- Word Guess: keyboard A-Z or the on-screen letter buttons
+- Hint: press `0` or use the hint button
+- Help: press `F1`
+- Menu/Pause: press `Esc`
+>>>>>>> 46901752ed94fab7431df2f825c91e3494fedb58
