@@ -1,5 +1,4 @@
 # Smart Games Suite Pro
-
 Responsive offline-first game suite with Tic-Tac-Toe and Word Guess modes, stronger hard-mode AI, daily challenges, achievements, XP/streak tracking, two-player play, timer mode, tournament mode, audio controls, session stats, and local leaderboards.
 
 ## Current Workspace Status
