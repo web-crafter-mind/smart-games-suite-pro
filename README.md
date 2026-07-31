@@ -33,7 +33,9 @@ Then open `http://127.0.0.1:4173/`.
 - `PLAY_STORE_CHECKLIST.md` - packaging and Play Console checklist
 - `play-store/` - Play Store listing, Data Safety, and TWA wrapping drafts
 - `src/` - extracted pure engines and services used as the target modular architecture
+- `src/app-modules.mjs` - ES module bridge that exposes tested domain modules to the existing UI shell
 - `tests/` - dependency-free engine self-checks
+- `.github/workflows/validate.yml` - CI workflow that runs release validation and engine checks
 - `scripts/` - dependency-free local server and validation scripts
 
 ## Validate

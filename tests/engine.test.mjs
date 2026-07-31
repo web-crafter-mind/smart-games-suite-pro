@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { availableMoves, applyMove, createBoard, winner } from '../src/games/tic-tac-toe/engine.mjs';
+import { availableMoves, applyMove, createBoard, winner, winningLine } from '../src/games/tic-tac-toe/engine.mjs';
 import { bestMove } from '../src/games/tic-tac-toe/ai.mjs';
 import { createWordState, guessLetter } from '../src/games/word-guess/engine.mjs';
 import { readJson, writeJson } from '../src/services/storage.mjs';
@@ -7,6 +7,7 @@ import { readJson, writeJson } from '../src/services/storage.mjs';
 const board = createBoard();
 assert.deepEqual(availableMoves(board), [0, 1, 2, 3, 4, 5, 6, 7, 8]);
 assert.equal(winner(['X', 'X', 'X', '', '', '', '', '', '']), 'X');
+assert.deepEqual(winningLine(['X', 'X', 'X', '', '', '', '', '', '']), { winner: 'X', cells: [0, 1, 2] });
 assert.equal(winner(['X', 'O', 'X', 'X', 'O', 'O', 'O', 'X', 'X']), 'draw');
 assert.throws(() => applyMove(['X', '', '', '', '', '', '', '', ''], 0, 'O'), /occupied/);
 assert.equal(bestMove(['O', 'O', '', 'X', 'X', '', '', '', '']), 2);

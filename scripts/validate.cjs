@@ -16,6 +16,7 @@ const requiredFiles = [
   'src/games/tic-tac-toe/ai.mjs',
   'src/games/word-guess/engine.mjs',
   'src/services/storage.mjs',
+  'src/app-modules.mjs',
   'tests/engine.test.mjs',
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
@@ -36,6 +37,7 @@ const html = read('index.html');
 if (!html.includes('manifest.webmanifest')) throw new Error('index.html does not link manifest.webmanifest');
 if (!html.includes('power-pack.js')) throw new Error('index.html does not load power-pack.js');
 if (!html.includes('production-shell.js')) throw new Error('index.html does not load production-shell.js');
+if (!html.includes('src/app-modules.mjs')) throw new Error('index.html does not load the modular domain bridge');
 if (!html.includes('serviceWorker')) throw new Error('index.html does not register the service worker');
 if (!html.includes('mobileExitBtn')) throw new Error('Missing mobile exit button');
 if (!html.includes('mobileMusicBtn') || !html.includes('mobileSfxBtn')) throw new Error('Missing mobile audio controls');
@@ -55,6 +57,7 @@ for (const moduleFile of [
   'src/games/tic-tac-toe/ai.mjs',
   'src/games/word-guess/engine.mjs',
   'src/services/storage.mjs',
+  'src/app-modules.mjs',
   'tests/engine.test.mjs'
 ]) {
   const source = read(moduleFile);
@@ -69,7 +72,21 @@ if (!manifest.icons?.some((icon) => icon.sizes === '512x512' && icon.purpose.inc
 JSON.parse(read('manifest.json'));
 
 const serviceWorker = read('sw.js');
-for (const file of ['index.html', 'power-pack.js', 'production-shell.js', 'manifest.webmanifest', 'privacy-policy.html', 'terms.html', 'assets/background%20music/the_mountain-soft-background-492811.mp3', 'assets/icons/icon-512.png']) {
+for (const file of [
+  'index.html',
+  'src/app-modules.mjs',
+  'src/games/tic-tac-toe/engine.mjs',
+  'src/games/tic-tac-toe/ai.mjs',
+  'src/games/word-guess/engine.mjs',
+  'src/services/storage.mjs',
+  'power-pack.js',
+  'production-shell.js',
+  'manifest.webmanifest',
+  'privacy-policy.html',
+  'terms.html',
+  'assets/background%20music/the_mountain-soft-background-492811.mp3',
+  'assets/icons/icon-512.png'
+]) {
   if (!serviceWorker.includes(file)) throw new Error(`sw.js does not cache ${file}`);
 }
 

@@ -20,6 +20,10 @@ export function applyMove(board, index, player) {
 }
 
 export function winner(board) {
+  return winningLine(board)?.winner ?? (board.every(Boolean) ? 'draw' : null);
+}
+
+export function winningLine(board) {
   validateBoard(board);
   const lines = [
     [0, 1, 2],
@@ -33,10 +37,10 @@ export function winner(board) {
   ];
 
   for (const [a, b, c] of lines) {
-    if (board[a] && board[a] === board[b] && board[a] === board[c]) return board[a];
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) return { winner: board[a], cells: [a, b, c] };
   }
 
-  return board.every(Boolean) ? 'draw' : null;
+  return null;
 }
 
 export function validateBoard(board) {

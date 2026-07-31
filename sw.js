@@ -2,6 +2,11 @@ const CACHE = 'sgs-v6';
 const ASSETS = [
   './',
   './index.html',
+  './src/app-modules.mjs',
+  './src/games/tic-tac-toe/engine.mjs',
+  './src/games/tic-tac-toe/ai.mjs',
+  './src/games/word-guess/engine.mjs',
+  './src/services/storage.mjs',
   './power-pack.js',
   './production-shell.js',
   './favicon.svg',

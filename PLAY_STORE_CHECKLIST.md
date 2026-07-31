@@ -9,6 +9,8 @@ Use this project as the web/PWA source, then package it into an Android app befo
 - Production shell with sticky app bar, bottom navigation, profile, settings, theme selection, haptics toggle, export/import, reset confirmation, offline status, and legal links.
 - Mobile in-game action bar with Menu, Exit, Music, and SFX controls.
 - Modular `src/` baseline with pure Tic-Tac-Toe, Word Guess, and storage modules plus dependency-free engine tests.
+- Live Tic-Tac-Toe and Word Guess input paths integrated with the modular domain layer.
+- GitHub Actions validation workflow.
 - Service-worker update prompt for installed users when a newer offline version is available.
 - Power Hub with achievements, XP, streak tracking, daily challenge, and stronger hard-mode Tic-Tac-Toe AI.
 - Web app manifest with PNG and maskable launcher icons.

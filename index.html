@@ -1668,6 +1668,7 @@
         </div>
     </div>
 
+    <script type="module" src="src/app-modules.mjs"></script>
     <script>
         // ==================== AUDIO SYSTEM - SOFT MELODIC MUSIC ====================
         const AudioSystem = {
@@ -3272,7 +3273,14 @@
         }
 
         function makeMove(index) {
-            TTTGame.board[index] = TTTGame.currentPlayer;
+            const engine = window.SGSEngines?.ticTacToe;
+            try {
+                TTTGame.board = engine
+                    ? engine.applyMove(TTTGame.board, index, TTTGame.currentPlayer)
+                    : TTTGame.board.map((cell, i) => i === index ? TTTGame.currentPlayer : cell);
+            } catch (error) {
+                return;
+            }
             AudioSystem.playMenuSelect();
             renderTTTBoard();
             
@@ -3322,24 +3330,27 @@
         }
 
         function findBestMove() {
-            const emptyCells = TTTGame.board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
+            const engine = window.SGSEngines?.ticTacToe;
+            const emptyCells = engine ? engine.availableMoves(TTTGame.board) : TTTGame.board.map((v, i) => v === '' ? i : -1).filter(i => i !== -1);
             
             if (GameState.difficulty === 'easy') {
                 return emptyCells[Math.floor(Math.random() * emptyCells.length)];
             }
+
+            if (GameState.difficulty === 'hard' && engine) {
+                return engine.bestMove(TTTGame.board, 'O', 'X');
+            }
             
             // Win check
             for (const i of emptyCells) {
-                TTTGame.board[i] = 'O';
-                if (checkTTTWinner() === 'O') { TTTGame.board[i] = ''; return i; }
-                TTTGame.board[i] = '';
+                const board = TTTGame.board.map((cell, index) => index === i ? 'O' : cell);
+                if ((engine ? engine.winner(board) : localTTTWinner(board)) === 'O') return i;
             }
             
             // Block check
             for (const i of emptyCells) {
-                TTTGame.board[i] = 'X';
-                if (checkTTTWinner() === 'X') { TTTGame.board[i] = ''; return i; }
-                TTTGame.board[i] = '';
+                const board = TTTGame.board.map((cell, index) => index === i ? 'X' : cell);
+                if ((engine ? engine.winner(board) : localTTTWinner(board)) === 'X') return i;
             }
             
             if (emptyCells.includes(4)) return 4;
@@ -3353,12 +3364,23 @@
         }
 
         function checkTTTWinner() {
+            const engine = window.SGSEngines?.ticTacToe;
+            const line = engine?.winningLine(TTTGame.board);
+            if (line) {
+                TTTGame.winningCells = line.cells;
+                return line.winner;
+            }
+
+            return localTTTWinner(TTTGame.board);
+        }
+
+        function localTTTWinner(board) {
             const lines = [[0,1,2], [3,4,5], [6,7,8], [0,3,6], [1,4,7], [2,5,8], [0,4,8], [2,4,6]];
             
             for (const [a, b, c] of lines) {
-                if (TTTGame.board[a] && TTTGame.board[a] === TTTGame.board[b] && TTTGame.board[a] === TTTGame.board[c]) {
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
                     TTTGame.winningCells = [a, b, c];
-                    return TTTGame.board[a];
+                    return board[a];
                 }
             }
             return null;
@@ -3588,9 +3610,23 @@
 
         function guessLetter(letter) {
             if (WordGame.wrongLetters.includes(letter) || WordGame.correctLetters.includes(letter)) return;
-            
-            if (WordGame.word.includes(letter)) {
-                AudioSystem.playCorrect();
+
+            const wasCorrect = WordGame.word.includes(letter);
+            const previousWrongCount = WordGame.wrongLetters.length;
+            const previousShown = WordGame.shown;
+            const engine = window.SGSEngines?.wordGuess;
+
+            if (engine) {
+                try {
+                    Object.assign(WordGame, engine.guessLetter({
+                        ...WordGame,
+                        status: WordGame.gameActive ? 'playing' : 'lost'
+                    }, letter));
+                    WordGame.gameActive = WordGame.status === 'playing';
+                } catch (error) {
+                    return;
+                }
+            } else if (wasCorrect) {
                 WordGame.correctLetters.push(letter);
                 
                 let newShown = '';
@@ -3598,13 +3634,21 @@
                     newShown += WordGame.word[i] === letter ? letter : WordGame.shown[i];
                 }
                 WordGame.shown = newShown;
-                
-                WordGame.score += 10 * WordGame.word.split(letter).length - 1;
             } else {
-                AudioSystem.playWrong();
                 WordGame.wrongLetters.push(letter);
                 WordGame.remainingChances--;
-                GameState.sessionStats.mistakes++;
+            }
+
+            if (wasCorrect) {
+                AudioSystem.playCorrect();
+                if (WordGame.shown !== previousShown) {
+                    WordGame.score += 10 * WordGame.word.split(letter).length - 1;
+                }
+            } else {
+                AudioSystem.playWrong();
+                if (WordGame.wrongLetters.length > previousWrongCount) {
+                    GameState.sessionStats.mistakes++;
+                }
             }
             
             renderWordDisplay();
