@@ -23,10 +23,11 @@ Then open `http://127.0.0.1:4173/`.
 
 - `index.html` - restored playable game page with inline CSS and JavaScript
 - `power-pack.js` - Power Hub, achievements, daily challenge, XP/streak tracking, and stronger hard-mode Tic-Tac-Toe AI
+- `production-shell.js` - Android-style profile, settings, theme, haptics, offline status, bottom navigation, and local data tools
 - `sw.js` - offline cache for the app shell and icon files
 - `manifest.webmanifest` / `manifest.json` - installable PWA metadata
 - `assets/icons/` - PNG launcher icons, including a maskable 512px icon
-- `privacy-policy.html` - starter privacy page for publishing
+- `privacy-policy.html` / `terms.html` - offline legal pages for publishing
 - `PLAY_STORE_CHECKLIST.md` - packaging and Play Console checklist
 - `play-store/` - Play Store listing, Data Safety, and TWA wrapping drafts
 - `scripts/` - dependency-free local server and validation scripts
@@ -39,7 +40,7 @@ npm run validate
 
 ## Play Store Notes
 
-Google Play does not upload this web folder directly. Package it as an Android App Bundle using Trusted Web Activity/Bubblewrap or Capacitor, then upload the `.aab` in Play Console.
+Google Play does not upload this web folder directly. Package it as an Android App Bundle using Trusted Web Activity/Bubblewrap or Capacitor, then upload the signed `.aab` in Play Console.
 
 Before publishing, make sure the developer contact in your Play Console account is real and visible on the public store listing.
 

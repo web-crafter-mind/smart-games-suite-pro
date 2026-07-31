@@ -1,12 +1,14 @@
-const CACHE = 'sgs-v5';
+const CACHE = 'sgs-v6';
 const ASSETS = [
   './',
   './index.html',
   './power-pack.js',
+  './production-shell.js',
   './favicon.svg',
   './manifest.webmanifest',
   './manifest.json',
   './privacy-policy.html',
+  './terms.html',
   './assets/icons/icon-48.png',
   './assets/icons/icon-72.png',
   './assets/icons/icon-96.png',

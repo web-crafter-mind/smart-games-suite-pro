@@ -1327,7 +1327,8 @@
     <div class="mobile-action-bar" id="mobileActionBar" aria-label="Mobile game actions">
         <button class="mobile-action-btn" id="gameMenuBtn" type="button">Menu</button>
         <button class="mobile-action-btn exit" id="mobileExitBtn" type="button">Exit</button>
-        <button class="mobile-action-btn power" id="mobilePowerBtn" type="button">Power</button>
+        <button class="mobile-action-btn sound" id="mobileMusicBtn" type="button" aria-pressed="true">Music ON</button>
+        <button class="mobile-action-btn sound" id="mobileSfxBtn" type="button" aria-pressed="true">SFX ON</button>
     </div>
 
     <!-- Loading Screen -->
@@ -1688,7 +1689,7 @@
                 try {
                     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
                     this.masterGain = this.audioContext.createGain();
-                    this.masterGain.gain.value = 0.36;
+                    this.masterGain.gain.value = 0.58;
                     this.masterGain.connect(this.audioContext.destination);
                 } catch (e) {
                     console.log('Audio not supported');
@@ -1887,54 +1888,34 @@
                 }
             },
             
-            // Soft melodic background music
+            // Strong mobile-friendly arcade background music.
             startBgMusic() {
                 this.init();
                 if (!this.musicEnabled || this.bgMusicInterval) return;
                 this.resume();
-                
-                // Beautiful chord progressions (C major - Am - F - G)
-                const chordProgressions = [
-                    [130.81, 164.81, 196.00],  // C major (C3, E3, G3)
-                    [110.00, 130.81, 164.81],  // A minor (A2, C3, E3)
-                    [87.31, 110.00, 130.81],   // F major (F2, A2, C3)
-                    [98.00, 123.47, 146.83],   // G major (G2, B2, D3)
-                ];
-                
-                // Gentle melody notes that float over chords
-                const melodyNotes = [
-                    [392, 440, 523, 494],      // G4, A4, C5, B4
-                    [523, 494, 440, 392],      // C5, B4, A4, G4
-                    [349, 392, 440, 523],      // F4, G4, A4, C5
-                    [392, 494, 523, 587],      // G4, B4, C5, D5
-                ];
-                
+
+                const bassLine = [110, 146.83, 164.81, 196];
+                const leadLine = [440, 523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 493.88];
+                const harmony = [220, 261.63, 329.63, 392];
+
                 const playSection = () => {
                     if (!this.musicEnabled) return;
-                    
-                    const chordIndex = this.melodyIndex % chordProgressions.length;
-                    const chord = chordProgressions[chordIndex];
-                    const melody = melodyNotes[chordIndex];
-                    
-                    // Play ambient pad chord
-                    chord.forEach((note, i) => {
-                        this.playAmbientPad(note, 8, 0.04);
-                    });
-                    
-                    // Play gentle melody notes
-                    melody.forEach((note, i) => {
-                        setTimeout(() => {
-                            if (this.musicEnabled) {
-                                this.playPianoNote(note, 1.5, 0.06);
-                            }
-                        }, i * 1800 + 500);
-                    });
-                    
+                    const step = this.melodyIndex % leadLine.length;
+                    const root = bassLine[this.melodyIndex % bassLine.length];
+
+                    this.playPianoNote(root, 0.34, 0.22, 0);
+                    this.playPianoNote(root / 2, 0.24, 0.20, 0.48);
+                    this.playPianoNote(harmony[this.melodyIndex % harmony.length], 0.26, 0.14, 0.24);
+                    this.playPianoNote(leadLine[step], 0.26, 0.18, 0.08);
+                    this.playPianoNote(leadLine[(step + 2) % leadLine.length], 0.24, 0.15, 0.54);
+                    this.playPianoNote(880, 0.06, 0.10, 0.96);
+                    this.playPianoNote(660, 0.06, 0.09, 1.42);
+
                     this.melodyIndex++;
                 };
                 
                 playSection();
-                this.bgMusicInterval = setInterval(playSection, 8000);
+                this.bgMusicInterval = setInterval(playSection, 1800);
             },
             
             stopBgMusic() {
@@ -3856,6 +3837,8 @@
             const sfxLabel = `SFX: ${AudioSystem.sfxEnabled ? 'ON' : 'OFF'}`;
             const musicBtn = document.getElementById('musicBtn');
             const sfxBtn = document.getElementById('sfxBtn');
+            const mobileMusicBtn = document.getElementById('mobileMusicBtn');
+            const mobileSfxBtn = document.getElementById('mobileSfxBtn');
             const musicItem = document.querySelector('#settingsItems .menu-item[data-index="0"]');
             const sfxItem = document.querySelector('#settingsItems .menu-item[data-index="1"]');
 
@@ -3869,6 +3852,18 @@
                 sfxBtn.textContent = sfxLabel;
                 sfxBtn.classList.toggle('muted', !AudioSystem.sfxEnabled);
                 sfxBtn.setAttribute('aria-pressed', String(AudioSystem.sfxEnabled));
+            }
+
+            if (mobileMusicBtn) {
+                mobileMusicBtn.textContent = AudioSystem.musicEnabled ? 'Music ON' : 'Music OFF';
+                mobileMusicBtn.classList.toggle('muted', !AudioSystem.musicEnabled);
+                mobileMusicBtn.setAttribute('aria-pressed', String(AudioSystem.musicEnabled));
+            }
+
+            if (mobileSfxBtn) {
+                mobileSfxBtn.textContent = AudioSystem.sfxEnabled ? 'SFX ON' : 'SFX OFF';
+                mobileSfxBtn.classList.toggle('muted', !AudioSystem.sfxEnabled);
+                mobileSfxBtn.setAttribute('aria-pressed', String(AudioSystem.sfxEnabled));
             }
 
             if (musicItem) musicItem.innerHTML = `<span class="arrow">▶</span> ${musicLabel}`;
@@ -4007,10 +4002,8 @@
 
         document.getElementById('gameMenuBtn').addEventListener('click', openPauseMenu);
         document.getElementById('mobileExitBtn').addEventListener('click', () => showExitOverlay('game'));
-        document.getElementById('mobilePowerBtn').addEventListener('click', () => {
-            const powerFab = document.getElementById('powerFab');
-            if (powerFab) powerFab.click();
-        });
+        document.getElementById('mobileMusicBtn').addEventListener('click', () => document.getElementById('musicBtn').click());
+        document.getElementById('mobileSfxBtn').addEventListener('click', () => document.getElementById('sfxBtn').click());
         document.getElementById('resumeGameBtn').addEventListener('click', closePauseMenu);
         document.getElementById('pauseMainMenuBtn').addEventListener('click', leaveCurrentGame);
         document.getElementById('pauseSettingsBtn').addEventListener('click', () => {
@@ -4082,5 +4075,6 @@
         }
     </script>
     <script src="power-pack.js"></script>
+    <script src="production-shell.js"></script>
 </body>
 </html>

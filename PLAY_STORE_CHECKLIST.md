@@ -6,13 +6,15 @@ Use this project as the web/PWA source, then package it into an Android app befo
 
 - Polished responsive app shell for phones, tablets, desktop, and landscape screens.
 - Offline-ready game bundle with restored `index.html` plus `power-pack.js`.
+- Production shell with sticky app bar, bottom navigation, profile, settings, theme selection, haptics toggle, export/import, reset confirmation, offline status, and legal links.
+- Mobile in-game action bar with Menu, Exit, Music, and SFX controls.
 - Power Hub with achievements, XP, streak tracking, daily challenge, and stronger hard-mode Tic-Tac-Toe AI.
 - Web app manifest with PNG and maskable launcher icons.
 - Offline service worker cache.
-- Starter privacy policy page.
+- Privacy Policy and Terms of Service pages.
 - Local-only score/name storage with sanitized leaderboard output.
 - Dependency-free validation script: `npm run validate`.
-- Persisted music and sound-effect preferences.
+- Persisted music, sound-effect, theme, haptic, username, progress, XP, achievement, and leaderboard preferences.
 
 ## Before Upload
 
@@ -20,9 +22,9 @@ Use this project as the web/PWA source, then package it into an Android app befo
 2. Run `npm run validate`.
 3. Host the app on HTTPS if using Trusted Web Activity.
 4. Package the project as an Android App Bundle (`.aab`) with Bubblewrap/TWA or Capacitor.
-5. Configure the Android package name, version code, app signing, and target SDK in the generated Android project.
+5. Configure the Android package name, version code, app signing, and target SDK in the generated Android project. For releases submitted on or after August 31, 2026, new apps and updates must target Android 16 / API 36 or higher.
 6. Add Digital Asset Links (`.well-known/assetlinks.json`) if using Trusted Web Activity.
-7. Test on at least one phone, one tablet-sized viewport/device, and landscape mode.
+7. Test on at least one 320px/360px phone, one tablet-sized viewport/device, and landscape mode.
 8. Upload screenshots, 512x512 high-res icon, feature graphic, short description, full description, content rating, privacy policy URL, and Data safety answers in Play Console.
 
 ## Current Policy Links

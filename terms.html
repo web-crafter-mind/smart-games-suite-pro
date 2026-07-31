@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#050816">
+  <title>Terms of Service - Smart Games Suite Pro</title>
+  <style>
+    :root {
+      color-scheme: dark light;
+      --bg: #050816;
+      --panel: #111a2d;
+      --text: #f4fffb;
+      --muted: #a8c8c0;
+      --primary: #00ffaa;
+      --outline: rgba(135, 255, 219, 0.32);
+    }
+
+    @media (prefers-color-scheme: light) {
+      :root {
+        --bg: #f7fbff;
+        --panel: #ffffff;
+        --text: #07130f;
+        --muted: #40534e;
+        --primary: #006c52;
+        --outline: rgba(0, 95, 73, 0.22);
+      }
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      padding: max(22px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(22px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      line-height: 1.6;
+    }
+
+    main {
+      width: min(860px, 100%);
+      margin: 0 auto;
+      border: 1px solid var(--outline);
+      border-radius: 20px;
+      background: var(--panel);
+      box-shadow: 0 18px 54px rgba(0, 0, 0, 0.28);
+      overflow: hidden;
+    }
+
+    header,
+    section {
+      padding: clamp(18px, 4vw, 28px);
+      border-bottom: 1px solid var(--outline);
+    }
+
+    section:last-child {
+      border-bottom: 0;
+    }
+
+    h1,
+    h2,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: clamp(1.45rem, 5vw, 2.2rem);
+      line-height: 1.15;
+    }
+
+    h2 {
+      margin-bottom: 8px;
+      color: var(--primary);
+      font-size: 1rem;
+    }
+
+    p + p {
+      margin-top: 10px;
+    }
+
+    .muted {
+      margin-top: 8px;
+      color: var(--muted);
+    }
+
+    a {
+      color: var(--primary);
+      font-weight: 800;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Terms of Service</h1>
+      <p class="muted">Smart Games Suite Pro. Last updated: July 31, 2026.</p>
+    </header>
+
+    <section>
+      <h2>Use of the App</h2>
+      <p>Smart Games Suite Pro is an offline game suite for personal entertainment. You may use the app on supported devices according to the app store terms that apply to your download.</p>
+    </section>
+
+    <section>
+      <h2>Offline Data</h2>
+      <p>The app stores game progress, settings, achievements, XP, statistics, and leaderboards locally on your device. Uninstalling the app or clearing app storage may remove this data.</p>
+    </section>
+
+    <section>
+      <h2>No Online Account</h2>
+      <p>The app does not require a backend account, cloud sync, authentication, or online service to play. Export and import tools are provided only for local data portability.</p>
+    </section>
+
+    <section>
+      <h2>Fair Use</h2>
+      <p>Do not modify, redistribute, or present the app in a way that violates applicable law, platform rules, or third-party rights.</p>
+    </section>
+
+    <section>
+      <h2>Disclaimer</h2>
+      <p>The app is provided as-is. Game results, local scores, and local progress are for entertainment and may be reset by device storage changes.</p>
+    </section>
+
+    <section>
+      <h2>Contact</h2>
+      <p>For support or publishing updates, contact <a href="mailto:support@example.com">support@example.com</a>.</p>
+      <p><a href="index.html">Return to app</a></p>
+    </section>
+  </main>
+</body>
+</html>
