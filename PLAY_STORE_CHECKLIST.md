@@ -8,6 +8,8 @@ Use this project as the web/PWA source, then package it into an Android app befo
 - Offline-ready game bundle with restored `index.html` plus `power-pack.js`.
 - Production shell with sticky app bar, bottom navigation, profile, settings, theme selection, haptics toggle, export/import, reset confirmation, offline status, and legal links.
 - Mobile in-game action bar with Menu, Exit, Music, and SFX controls.
+- Modular `src/` baseline with pure Tic-Tac-Toe, Word Guess, and storage modules plus dependency-free engine tests.
+- Service-worker update prompt for installed users when a newer offline version is available.
 - Power Hub with achievements, XP, streak tracking, daily challenge, and stronger hard-mode Tic-Tac-Toe AI.
 - Web app manifest with PNG and maskable launcher icons.
 - Offline service worker cache.
@@ -15,6 +17,7 @@ Use this project as the web/PWA source, then package it into an Android app befo
 - Local-only score/name storage with sanitized leaderboard output.
 - Dependency-free validation script: `npm run validate`.
 - Persisted music, sound-effect, theme, haptic, username, progress, XP, achievement, and leaderboard preferences.
+- Bundled offline background music with generated synth fallback.
 
 ## Before Upload
 

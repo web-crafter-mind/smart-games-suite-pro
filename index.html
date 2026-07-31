@@ -1680,6 +1680,8 @@
             currentNotes: [],
             settingsKey: 'sgsAudioSettings',
             unlocked: false,
+            musicTrack: null,
+            musicTrackFailed: false,
             
             init() {
                 if (this.audioContext) {
@@ -1891,8 +1893,26 @@
             // Strong mobile-friendly arcade background music.
             startBgMusic() {
                 this.init();
-                if (!this.musicEnabled || this.bgMusicInterval) return;
+                if (!this.musicEnabled || this.bgMusicInterval || (this.musicTrack && !this.musicTrack.paused)) return;
                 this.resume();
+
+                if (!this.musicTrackFailed) {
+                    if (!this.musicTrack) {
+                        this.musicTrack = new Audio('assets/background%20music/the_mountain-soft-background-492811.mp3');
+                        this.musicTrack.loop = true;
+                        this.musicTrack.preload = 'auto';
+                        this.musicTrack.volume = 0.62;
+                    }
+
+                    const playTrack = this.musicTrack.play();
+                    if (playTrack && typeof playTrack.catch === 'function') {
+                        playTrack.then(() => {}).catch(() => {
+                            this.musicTrackFailed = true;
+                            this.startBgMusic();
+                        });
+                        return;
+                    }
+                }
 
                 const bassLine = [110, 146.83, 164.81, 196];
                 const leadLine = [440, 523.25, 659.25, 783.99, 659.25, 587.33, 523.25, 493.88];
@@ -1919,6 +1939,9 @@
             },
             
             stopBgMusic() {
+                if (this.musicTrack) {
+                    this.musicTrack.pause();
+                }
                 if (this.bgMusicInterval) {
                     clearInterval(this.bgMusicInterval);
                     this.bgMusicInterval = null;
@@ -4070,7 +4093,9 @@
 
         if ('serviceWorker' in navigator && ['http:', 'https:'].includes(window.location.protocol)) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(() => {});
+                navigator.serviceWorker.register('./sw.js').then((registration) => {
+                    window.dispatchEvent(new CustomEvent('sgs-service-worker-ready', { detail: registration }));
+                }).catch(() => {});
             });
         }
     </script>

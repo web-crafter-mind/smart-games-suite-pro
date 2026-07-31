@@ -5,7 +5,8 @@
   "description": "Offline-first responsive game suite prepared for Android Play Store wrapping.",
   "scripts": {
     "serve": "node scripts/serve.cjs",
-    "validate": "node scripts/validate.cjs"
+    "test": "node tests/engine.test.mjs",
+    "validate": "node scripts/validate.cjs && node tests/engine.test.mjs"
   },
   "keywords": [
     "games",

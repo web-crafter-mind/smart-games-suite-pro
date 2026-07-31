@@ -11,6 +11,12 @@ const requiredFiles = [
   'sw.js',
   'privacy-policy.html',
   'terms.html',
+  'assets/background music/the_mountain-soft-background-492811.mp3',
+  'src/games/tic-tac-toe/engine.mjs',
+  'src/games/tic-tac-toe/ai.mjs',
+  'src/games/word-guess/engine.mjs',
+  'src/services/storage.mjs',
+  'tests/engine.test.mjs',
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
   'assets/icons/icon-maskable-512.png'
@@ -44,6 +50,17 @@ new Function(powerPack);
 const productionShell = read('production-shell.js');
 new Function(productionShell);
 
+for (const moduleFile of [
+  'src/games/tic-tac-toe/engine.mjs',
+  'src/games/tic-tac-toe/ai.mjs',
+  'src/games/word-guess/engine.mjs',
+  'src/services/storage.mjs',
+  'tests/engine.test.mjs'
+]) {
+  const source = read(moduleFile);
+  if (!source.includes('export') && !source.includes('import')) throw new Error(`${moduleFile} is not an ES module`);
+}
+
 const manifest = JSON.parse(read('manifest.webmanifest'));
 if (!manifest.icons?.some((icon) => icon.sizes === '512x512' && icon.purpose.includes('maskable'))) {
   throw new Error('manifest.webmanifest is missing a 512x512 maskable icon');
@@ -52,7 +69,7 @@ if (!manifest.icons?.some((icon) => icon.sizes === '512x512' && icon.purpose.inc
 JSON.parse(read('manifest.json'));
 
 const serviceWorker = read('sw.js');
-for (const file of ['index.html', 'power-pack.js', 'production-shell.js', 'manifest.webmanifest', 'privacy-policy.html', 'terms.html', 'assets/icons/icon-512.png']) {
+for (const file of ['index.html', 'power-pack.js', 'production-shell.js', 'manifest.webmanifest', 'privacy-policy.html', 'terms.html', 'assets/background%20music/the_mountain-soft-background-492811.mp3', 'assets/icons/icon-512.png']) {
   if (!serviceWorker.includes(file)) throw new Error(`sw.js does not cache ${file}`);
 }
 

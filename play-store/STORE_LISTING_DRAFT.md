@@ -22,6 +22,7 @@ Features:
 - Power Hub with XP, levels, streaks, and achievements
 - Profile page with player level, XP, win rate, high score, streaks, and achievements
 - Settings for theme, sound, music, haptics, and local data export/import
+- Offline background music and sound effects with direct mobile toggles
 - Local leaderboards and session stats
 - Offline-first play after installation
 - Responsive layout for phones, tablets, Chromebooks, and desktop browsers
@@ -34,7 +35,7 @@ tic tac toe, word guess, brain game, puzzle game, offline game, two player game,
 
 ## Release Notes
 
-Initial Play Store release with Tic-Tac-Toe, Word Guess, Power Hub achievements, daily challenges, profile/settings, stronger hard-mode AI, stronger mobile music controls, offline support, and responsive mobile/tablet layout.
+Initial Play Store release with Tic-Tac-Toe, Word Guess, Power Hub achievements, daily challenges, profile/settings, stronger hard-mode AI, offline background music, stronger mobile music controls, offline support, update prompt, and responsive mobile/tablet layout.
 
 ## Suggested Category
 

@@ -9,6 +9,7 @@ const ASSETS = [
   './manifest.json',
   './privacy-policy.html',
   './terms.html',
+  './assets/background%20music/the_mountain-soft-background-492811.mp3',
   './assets/icons/icon-48.png',
   './assets/icons/icon-72.png',
   './assets/icons/icon-96.png',
@@ -59,4 +60,10 @@ self.addEventListener('fetch', (event) => {
       return cached || network;
     })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });

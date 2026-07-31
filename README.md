@@ -21,21 +21,31 @@ Then open `http://127.0.0.1:4173/`.
 
 ## Project Files
 
-- `index.html` - restored playable game page with inline CSS and JavaScript
+- `index.html` - canonical playable game page and app entry point
 - `power-pack.js` - Power Hub, achievements, daily challenge, XP/streak tracking, and stronger hard-mode Tic-Tac-Toe AI
 - `production-shell.js` - Android-style profile, settings, theme, haptics, offline status, bottom navigation, and local data tools
 - `sw.js` - offline cache for the app shell and icon files
-- `manifest.webmanifest` / `manifest.json` - installable PWA metadata
+- `manifest.webmanifest` - canonical installable PWA metadata
+- `manifest.json` - duplicate manifest fallback for packaging tools that expect this filename
 - `assets/icons/` - PNG launcher icons, including a maskable 512px icon
+- `assets/background music/` - offline background music used by the mobile audio system
 - `privacy-policy.html` / `terms.html` - offline legal pages for publishing
 - `PLAY_STORE_CHECKLIST.md` - packaging and Play Console checklist
 - `play-store/` - Play Store listing, Data Safety, and TWA wrapping drafts
+- `src/` - extracted pure engines and services used as the target modular architecture
+- `tests/` - dependency-free engine self-checks
 - `scripts/` - dependency-free local server and validation scripts
 
 ## Validate
 
 ```powershell
 npm run validate
+```
+
+Run the pure engine checks only:
+
+```powershell
+npm run test
 ```
 
 ## Play Store Notes

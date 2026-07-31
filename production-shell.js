@@ -368,6 +368,33 @@
         background: rgba(255, 90, 106, 0.1);
       }
 
+      .prod-update {
+        position: fixed;
+        left: 50%;
+        bottom: max(132px, calc(env(safe-area-inset-bottom) + 132px));
+        z-index: 850;
+        display: none;
+        width: min(420px, calc(100% - 28px));
+        transform: translateX(-50%);
+        border: 1px solid var(--sgs-outline);
+        border-radius: 18px;
+        background: var(--sgs-surface-high);
+        color: var(--sgs-text);
+        box-shadow: var(--sgs-shadow);
+        padding: 14px;
+      }
+
+      .prod-update.open {
+        display: grid;
+        gap: 10px;
+      }
+
+      .prod-update-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
       .prod-select,
       .prod-input {
         width: 100%;
@@ -465,6 +492,15 @@
           <div class="prod-body" id="prodSheetBody"></div>
         </div>
       </section>
+
+      <aside class="prod-update" id="prodUpdatePrompt" role="status" aria-live="polite">
+        <strong>Update available</strong>
+        <span class="prod-muted">A newer offline version is ready.</span>
+        <div class="prod-update-actions">
+          <button class="prod-chip" id="prodUpdateLaterBtn" type="button">Later</button>
+          <button class="prod-chip" id="prodUpdateNowBtn" type="button">Update</button>
+        </div>
+      </aside>
     `);
   }
 
@@ -663,6 +699,42 @@
     status.textContent = navigator.onLine ? 'Online • Cached' : 'Offline Ready';
   }
 
+  function bindPwaUpdates() {
+    let waitingWorker = null;
+    const prompt = document.getElementById('prodUpdatePrompt');
+
+    function showUpdate(worker) {
+      waitingWorker = worker;
+      prompt?.classList.add('open');
+    }
+
+    window.addEventListener('sgs-service-worker-ready', (event) => {
+      const registration = event.detail;
+      if (!registration) return;
+      if (registration.waiting) showUpdate(registration.waiting);
+      registration.addEventListener('updatefound', () => {
+        const worker = registration.installing;
+        if (!worker) return;
+        worker.addEventListener('statechange', () => {
+          if (worker.state === 'installed' && navigator.serviceWorker.controller) showUpdate(worker);
+        });
+      });
+    });
+
+    document.getElementById('prodUpdateNowBtn')?.addEventListener('click', () => {
+      waitingWorker?.postMessage({ type: 'SKIP_WAITING' });
+      prompt?.classList.remove('open');
+    });
+
+    document.getElementById('prodUpdateLaterBtn')?.addEventListener('click', () => {
+      prompt?.classList.remove('open');
+    });
+
+    navigator.serviceWorker?.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
+  }
+
   function bindGlobalEvents() {
     document.getElementById('prodCloseBtn')?.addEventListener('click', closeSheet);
     document.getElementById('prodSheet')?.addEventListener('click', (event) => {
@@ -689,6 +761,7 @@
     applyTheme();
     updateOnlineStatus();
     bindGlobalEvents();
+    bindPwaUpdates();
   }
 
   if (document.readyState === 'loading') {
